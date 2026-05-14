@@ -10,6 +10,7 @@
     --deep:#0a1628; --accent:#00b4d8; --gold:#ffd60a; --silver:#cdd6f4;
     --glass:rgba(255,255,255,0.07); --border:rgba(255,255,255,0.12);
     --positive:#4caf50; --negative:#ef5350;
+    --bg: linear-gradient(180deg,#07111f,#0a1628);
   }
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   body{
@@ -91,6 +92,10 @@
     min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
   .combo-slot.filled{border-style:solid;border-color:rgba(255,214,10,0.5);background:rgba(255,214,10,0.08);}
   .combo-slot.active-select{border-color:var(--accent);background:rgba(0,180,216,0.1);}
+.combo-slot.add-slot{border-color:rgba(0,180,216,0.3);cursor:pointer;flex:0 0 auto;min-width:60px;max-width:70px;}
+  .combo-slot.add-slot:active{background:rgba(0,180,216,0.1);}
+  .combo-slot-add{font-size:18px;color:var(--accent);line-height:1;}
+  .combo-slot-add-label{font-size:9px;color:var(--accent);margin-top:3px;}																									
   .combo-slot-name{font-weight:700;font-size:13px;color:var(--gold);}
   .combo-slot-bv{font-size:10px;color:var(--silver);opacity:0.7;margin-top:2px;}
   .combo-slot-empty{font-size:10px;color:var(--silver);opacity:0.4;}
@@ -190,7 +195,7 @@
   .save-slot-name{font-size:13px;font-weight:600; color:#ffffff;}
   .save-slot-meta{font-size:10px;color:var(--silver);opacity:0.55;margin-top:1px;}
   .save-slot-empty{font-size:12px;color:var(--silver);opacity:0.35;font-style:italic;}
-  .save-slot-del{background:none;border:none;color:var(--negative);opacity:0.5;font-size:14px;cursor:pointer;padding:2px 4px;}
+  .save-slot-del{background:none;border:none;color:var(--negative);font-size:14px;cursor:pointer;padding:2px 4px;}
   .save-slot-del:hover{opacity:1;}
   .save-mode-title{font-size:12px;color:var(--silver);margin-bottom:6px;}
 
@@ -213,7 +218,7 @@
   .pcs-val{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--accent);margin-top:2px;}
   .pcs-factor{font-size:9px;color:var(--silver);opacity:0.4;margin-top:1px;}
   .ded-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
-  .ded-name{font-size:12px;}
+  .ded-name{font-size:12px;color: var(--silver);}
   .ded-counter{display:flex;align-items:center;gap:8px;}
   .ded-btn{width:26px;height:26px;border-radius:7px;border:1px solid var(--border);background:var(--glass);color:#fff;font-size:15px;cursor:pointer;}
   .ded-count{font-family:'Bebas Neue',sans-serif;font-size:19px;width:20px;text-align:center;color:var(--negative);}
@@ -233,6 +238,27 @@
   .nav-icon{font-size:19px;}
 
   .empty{text-align:center;padding:26px 20px;color:var(--silver);opacity:0.4;}
+  
+  /* BUY ME A COFFEE */
+  .bmc-footer{text-align:center;padding:20px 16px 12px;opacity:0.55;transition:opacity 0.2s;}
+  .bmc-footer:hover{opacity:1;}
+  .bmc-footer a{
+    display:inline-flex;align-items:center;gap:7px;
+    text-decoration:none;
+    font-size:12px;font-weight:600;
+    color:var(--silver);
+    background:var(--glass);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:7px 16px;
+    transition:all 0.2s;
+  }
+  .bmc-footer a:hover{
+    border-color:var(--gold);
+    color:var(--gold);
+    background:rgba(255,214,10,0.08);
+  }
+  
   .empty-icon{font-size:34px;margin-bottom:7px;}
   .btn-reset{width:100%;padding:10px;border-radius:11px;border:1px solid rgba(239,83,80,0.3);
     background:rgba(239,83,80,0.08);color:#ef5350;font-weight:600;font-size:13px;cursor:pointer;margin-top:9px;}
@@ -260,7 +286,7 @@
 
   /* JUMP PICKER MODAL */
   .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;
-    display:flex;align-items:flex-end;justify-content:center;}
+    display:flex;align-items:center;justify-content:center;}
   .modal-overlay.hidden{display:none;}
   .modal{background:#0d1f3c;border:1px solid var(--border);border-radius:20px 20px 0 0;
     width:100%;max-width:480px;max-height:75vh;overflow:hidden;display:flex;flex-direction:column;}
@@ -362,6 +388,7 @@
 
 	  body{
 		padding:0;
+		background:linear-gradient(180deg,#07111f,#0a1628);
 	  }
 
 	  .app{
@@ -378,6 +405,18 @@
 		transform:translateX(-50%);
 		max-width:480px;
 	  }
+	}
+	/* LOADED PROGRAM NAME */
+	#loadedProgramName{
+	  font-family:'Bebas Neue',sans-serif;
+	  font-size:20px;
+	  color:#ffffff;
+	  letter-spacing:2px;
+	  margin-bottom:4px;
+	  display:none;
+	}
+	#loadedProgramName.visible{
+	  display:block;
 	}
 	.element-card,
 	.program-item,
@@ -477,7 +516,7 @@
       <div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.08);
         font-size:10px;opacity:0.5;">
         ⚠️ Program structure rules (max elements, which jumps are allowed per program type/level) 
-        are defined in ISU Special Regulations & Technical Panel Handbook — not in Comm. 2786.
+        are defined in ISU Special Regulations & Technical Panel Handbook.
         Always verify with official ISU documents for competition use.
       </div>
     </div>
@@ -487,6 +526,7 @@
 <!-- PROGRAM PAGE -->
 <div class="page" id="page-program">
   <div class="section">
+    <div id="loadedProgramName"></div>
     <div class="section-title">Program</div>
     <div id="programList"></div>
     <div class="save-row">
@@ -554,11 +594,11 @@
     <div class="score-divider"></div>
     <div class="score-row"><span class="total-label">TOTAL SCORE</span><span class="total-val" id="grandTotal">0.00</span></div>
   </div>
-  <div class="section" style="margin-top:13px;">
-    <div class="section-title">Element Breakdown</div>
-    <div id="breakdownList" class="program-list"></div>
-  </div>
 </div>
+
+  <div class="bmc-footer">
+    <a href="https://buymeacoffee.com/mycocorico" target="_blank" rel="noopener noreferrer">☕ Buy me a coffee</a>
+  </div>
 
 </div><!-- .app -->
 
@@ -741,10 +781,11 @@ let state = {
   category:'recreational', programType:'SP', gender:'men',
   filter:'all', search:'', program:[],
   pcs:{sk:0,tr:0,pe:0,co:0,in:0}, deductions:{}, selectedGOE:{},
+  programName: '',  // name of currently loaded program
 };
 
 // Combo builder state
-let combo = { slots:[null,null,null], goe:'0', secondHalf:false };
+let combo = { slots:[], goe:'0', secondHalf:false };
 let modalSlot = null; // which slot we're picking for
 
 // ─── SCORING HELPERS ───
@@ -837,8 +878,8 @@ function comboTotal() {
 function renderComboSlots() {
   const container = document.getElementById('comboSlots');
   let html = '';
-  for (let i = 0; i < 3; i++) {
-    const j = combo.slots[i];
+
+  combo.slots.forEach((j, i) => {
     if (i > 0) html += `<div class="combo-plus">+</div>`;
     if (j) {
       html += `<div class="combo-slot filled" onclick="openModal(${i})">
@@ -846,13 +887,17 @@ function renderComboSlots() {
         <div class="combo-slot-bv">${j.isEuler ? 'Eu 0.00' : j.bv.toFixed(2)}</div>
         <div class="remove-x" onclick="removeComboSlot(event,${i})">✕ remove</div>
       </div>`;
-    } else {
-      // Only show slot if previous is filled or it's slot 0
-      const enabled = i === 0 || combo.slots[i-1] !== null;
-      html += `<div class="combo-slot ${enabled?'':'disabled-slot'}" onclick="${enabled?'openModal('+i+')':''}">
-        <div class="combo-slot-empty">${enabled ? 'Tap to add' : '—'}</div>
-      </div>`;
     }
+  });
+
+  // "+ Add Jump" button — show when last slot is filled (or no slots yet)
+  const lastFilled = combo.slots.length === 0 || combo.slots[combo.slots.length - 1] !== null;
+  if (lastFilled) {
+    if (combo.slots.length > 0) html += `<div class="combo-plus">+</div>`;
+    html += `<div class="combo-slot add-slot" onclick="openModal(${combo.slots.length})">
+      <div class="combo-slot-add">＋</div>
+      <div class="combo-slot-add-label">Add Jump</div>
+    </div>`;
   }
   container.innerHTML = html;
 }
@@ -910,14 +955,13 @@ function setComboGOE(g) {
 
 function removeComboSlot(e, idx) {
   e.stopPropagation();
-  // Clear this and all subsequent slots
-  for (let i = idx; i < 3; i++) combo.slots[i] = null;
+  combo.slots.splice(idx, 1);
   renderComboSlots();
   renderComboPreview();
 }
 
 function clearCombo() {
-  combo = {slots:[null,null,null], goe:'0', secondHalf:false};
+  combo = {slots:[], goe:'0', secondHalf:false};
   document.getElementById('comboSH').checked = false;
   renderComboSlots();
   renderComboGOE();
@@ -942,6 +986,11 @@ function addComboToProgram() {
 
 // ─── MODAL ───
 function openModal(slotIdx) {
+  // Adding a new slot?
+  if (slotIdx === combo.slots.length) {
+    combo.slots.push(null);
+    renderComboSlots();
+  }
   modalSlot = slotIdx;
   const modal = document.getElementById('modalOverlay');
   const title = document.getElementById('modalTitle');
@@ -952,17 +1001,12 @@ function openModal(slotIdx) {
   modal.classList.remove('hidden');
   searchEl.value = '';
 
-  if (slotIdx === 0) {
-    title.textContent = '1st Jump';
-    sub.textContent = 'Select the first jump in the combo';
-  } else if (slotIdx === 1) {
-    title.textContent = '2nd Jump';
-    sub.textContent = 'Select 2nd jump (or Euler for a 3-jump combo)';
-  } else if (slotIdx === 2) {
-    title.textContent = '3rd Jump';
-    sub.textContent = 'Only Toe Loop or Loop allowed in 3rd position';
-  }
-
+  const ordinals = ['1st','2nd','3rd','4th','5th','6th','7th','8th','9th','10th'];
+  const ord = ordinals[slotIdx] || `${slotIdx+1}th`;
+  title.textContent = `${ord} Jump`;
+  sub.textContent = slotIdx === 0
+    ? 'Select the first jump in the combo'
+    : 'Tap a jump to add it (Euler available as connecting jump)';
   body.innerHTML = renderModalJumps(slotIdx, '');
   // auto-focus search
   setTimeout(() => searchEl.focus(), 100);
@@ -978,7 +1022,7 @@ function renderModalJumps(slotIdx, q='') {
   let html = '';
 
   // Euler option for slot 1
-  if (slotIdx === 1 && combo.slots[0]) {
+  if (slotIdx > 0 && combo.slots[0]) {
     const eulerMatch = !query || 'euler'.includes(query) || 'eu'.includes(query);
     if (eulerMatch) {
       html += `<div class="modal-jump-group">
@@ -999,7 +1043,6 @@ function renderModalJumps(slotIdx, q='') {
   let anyResult = false;
   groups.forEach(lvl => {
     let jumpsInLvl = JUMPS.filter(j => j.level === lvl);
-    if (slotIdx === 2) jumpsInLvl = jumpsInLvl.filter(j => j.canThird);
 
     // Filter by search query
     if (query) {
@@ -1043,8 +1086,14 @@ function selectModalJump(jumpId) {
 }
 
 function closeModal() {
+  // Remove trailing null if user dismissed without picking
+  while (combo.slots.length > 0 && combo.slots[combo.slots.length - 1] === null) {
+    combo.slots.pop();
+  }						 
   document.getElementById('modalOverlay').classList.add('hidden');
   document.getElementById('modalSearch').value = '';
+  renderComboSlots();
+  renderComboPreview();					   
 }
 function closeModalOutside(e) { if(e.target.id==='modalOverlay') closeModal(); }
 
@@ -1218,8 +1267,6 @@ function renderTotal() {
   document.getElementById('totalDED').textContent=`-${ded.toFixed(2)}`;
   document.getElementById('grandTotal').textContent=total.toFixed(2);
 
-  const bd=document.getElementById('breakdownList');
-  if(!state.program.length){bd.innerHTML=`<div class="empty"><div>No elements yet</div></div>`;return;}
   let html='';
   state.program.forEach((item,idx)=>{
     const score=item.isCombo?comboScore(item):elementScore(item);
@@ -1237,6 +1284,19 @@ function renderTotal() {
     </div>`;
   });
   bd.innerHTML=html;
+}
+
+// ─── PROGRAM NAME DISPLAY ───
+function updateProgramNameDisplay() {
+  const el = document.getElementById('loadedProgramName');
+  if (!el) return;
+  if (state.programName) {
+    el.textContent = state.programName;
+    el.classList.add('visible');
+  } else {
+    el.textContent = '';
+    el.classList.remove('visible');
+  }
 }
 
 function renderAll(){renderElements();renderProgram();renderPCS();renderTotal();}
@@ -1293,7 +1353,7 @@ function addSingleElement(elId){
 }
 
 function removeElement(idx){state.program.splice(idx,1);renderProgram();renderTotal();}
-function resetProgram(){if(confirm('Clear all elements?')){state.program=[];renderAll();}}
+function resetProgram(){if(confirm('Clear all elements?')){state.program=[];state.programName='';updateProgramNameDisplay();renderAll();}}
 function setPCS(id,val){state.pcs[id]=parseFloat(val);renderPCS();renderTotal();}
 function changeDed(id,delta){state.deductions[id]=Math.max(0,(state.deductions[id]||0)+delta);renderPCS();renderTotal();}
 
@@ -1484,6 +1544,10 @@ function saveToSlot(slot) {
     JSON.stringify(saveData)
   );
 
+  // Set active program name so Share link picks it up
+  state.programName = saveData.name;
+  updateProgramNameDisplay();
+
   showToast(`✅ Saved to slot ${slot}`);
 
   document.getElementById('savePanel').style.display = 'none';
@@ -1514,6 +1578,8 @@ function loadToSlot(slot) {
   if (tabs[catIdx]) tabs[catIdx].classList.add('active');
   document.getElementById('spBtn').classList.toggle('active', state.programType === 'SP');
   document.getElementById('fsBtn').classList.toggle('active', state.programType === 'FS');
+  state.programName = saved.name || '';
+  updateProgramNameDisplay();
   document.getElementById('loadPanel').style.display = 'none';
   renderAll();
   showToast(`📂 Loaded slot ${slot} — ${state.program.length} elements`);
@@ -1538,6 +1604,7 @@ function encodeProgram() {
     g: state.gender,
     pcs: state.pcs,
     ded: state.deductions,
+    n: state.programName || '',
   };
   return btoa(encodeURIComponent(JSON.stringify(data)));
 }
@@ -1619,6 +1686,8 @@ function applyLoadedState(data) {
   state.gender = data.g || 'men';
   state.pcs = data.pcs || {sk:0,tr:0,pe:0,co:0,in:0};
   state.deductions = data.ded || {};
+  state.programName = data.n || '';
+  updateProgramNameDisplay();
 
   // Sync UI tabs
   document.querySelectorAll('#catTabs .tab').forEach(t => t.classList.remove('active'));
