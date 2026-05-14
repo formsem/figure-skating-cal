@@ -1546,9 +1546,19 @@ function decodeProgram(encoded) {
 
 function buildShareUrl() {
   const base = window.location.href.split('?')[0];
-  const json = JSON.stringify(state);
-  const compressed =
-    LZString.compressToEncodedURIComponent(json);
+  // v2: compact format — store only element IDs, not full objects
+  const compact = {
+    v: 2,
+    n: state.programName || '',
+    p: state.program.map(item => {
+      if (item.isCombo) {
+        return {c:1, j: item.comboJumps.map(j => j ? j.id : null), g: item.goe, s: item.secondHalf ? 1 : 0};
+      } else {
+        return {i: item.element.id, g: item.goe, s: item.secondHalf ? 1 : 0};
+      }
+    })
+  };
+  const compressed = LZString.compressToEncodedURIComponent(JSON.stringify(compact));
   return base + '?p=' + compressed;
 }
 
@@ -1610,12 +1620,29 @@ function importCode() {
 }
 
 function applyLoadedState(data) {
-  // Support both key formats:
-  // buildShareUrl (JSON.stringify state) → keys: program, programName
-  // encodeProgram (manual) → keys: p, n
-  state.program = data.p || data.program || [];
-  state.selectedGOE = data.selectedGOE || {};
-  state.programName = data.n || data.programName || '';
+  if (data.v === 2) {
+    // v2: compact format — reconstruct full element objects from IDs
+    const allEl = allElements();
+    state.program = (data.p || []).map(item => {
+      if (item.c) {
+        // Combo
+        const jumps = (item.j || []).map(jId => jId ? JUMPS.find(j => j.id === jId) || null : null);
+        const label = jumps.filter(Boolean).map(j => j.id).join('+');
+        return {isCombo:true, comboJumps:jumps, goe:item.g||'0', secondHalf:!!item.s, label};
+      } else {
+        // Single element
+        const el = allEl.find(e => e.id === item.i);
+        if (!el) return null;
+        return {element:el, goe:item.g||'0', secondHalf:!!item.s, isCombo:false};
+      }
+    }).filter(Boolean);
+    state.programName = data.n || '';
+  } else {
+    // v1: backward compat — full state object (old share links still work)
+    state.program = data.p || data.program || [];
+    state.selectedGOE = data.selectedGOE || {};
+    state.programName = data.n || data.programName || '';
+  }
   updateProgramNameDisplay();
   renderAll();
 }
