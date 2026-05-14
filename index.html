@@ -12,12 +12,27 @@
     --positive:#4caf50; --negative:#ef5350;
   }
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-  body{font-family:'DM Sans',sans-serif;background:var(--deep);color:#fff;min-height:100vh;overflow-x:hidden;}
+  body{
+	  margin:0;
+	  font-family:'DM Sans',sans-serif;
+	  background:var(--bg);
+	  color:var(--text);
+	  overflow-x:hidden;
+	  padding:16px;
+	  box-sizing:border-box;
+	}
   body::before{content:'';position:fixed;inset:0;
     background:radial-gradient(ellipse at 20% 10%,rgba(0,180,216,0.15) 0%,transparent 50%),
                radial-gradient(ellipse at 80% 80%,rgba(21,101,192,0.2) 0%,transparent 50%);
     pointer-events:none;z-index:0;}
-  .app{position:relative;z-index:1;max-width:480px;margin:0 auto;padding-bottom:100px;}
+  .app{
+	  position:relative;
+	  z-index:1;
+	  width:100%;
+	  max-width:1400px;
+	  margin:0 auto;
+	  padding:0 16px 100px;
+	}
 
   header{background:linear-gradient(135deg,#0d1f3c,#112240);border-bottom:1px solid var(--border);
     padding:14px 16px 12px;position:sticky;top:0;z-index:100;backdrop-filter:blur(20px);}
@@ -26,6 +41,7 @@
   .logo span{color:var(--gold);}
   .header-sub{font-size:10px;color:var(--silver);opacity:0.6;text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
   .comm-badge{font-size:10px;background:rgba(255,214,10,0.15);border:1px solid rgba(255,214,10,0.4);
+		text-decoration:none; display:inline-block;	transition:all 0.2s;
     color:var(--gold);border-radius:6px;padding:3px 8px;white-space:nowrap;}
 
   .tab-group{display:flex;gap:5px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;}
@@ -44,7 +60,7 @@
   .element-card{background:var(--glass);border:1px solid var(--border);
     border-radius:13px;padding:11px;margin-bottom:7px;display:flex;flex-direction:column;gap:8px;}
   .element-top{display:flex;align-items:center;gap:8px;}
-  .element-name{font-weight:600;font-size:13px;flex:1;}
+  .element-name{font-weight:600;font-size:13px;flex:1;color:#ffffff;}
   .element-bv{font-family:'Bebas Neue',sans-serif;font-size:17px;color:var(--gold);
     background:rgba(255,214,10,0.1);border-radius:7px;padding:2px 9px;}
   .goe-row{display:flex;align-items:center;gap:5px;}
@@ -111,7 +127,7 @@
   .drag-handle{color:var(--silver);opacity:0.3;font-size:18px;cursor:grab;flex-shrink:0;touch-action:none;}
   .prog-num{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--silver);opacity:0.35;width:18px;}
   .prog-info{flex:1;}
-  .prog-name{font-weight:700;font-size:14px;}
+  .prog-name{font-weight:700;font-size:14px; color:#ffffff;}
   .prog-detail{font-size:10px;color:var(--silver);opacity:0.6;margin-top:1px;}
   .prog-badges{display:flex;gap:4px;margin-top:3px;flex-wrap:wrap;}
   .badge{font-size:9px;padding:1px 6px;border-radius:4px;font-weight:600;}
@@ -131,8 +147,7 @@
     background:rgba(76,175,80,0.1);color:#4caf50;font-weight:600;font-size:13px;cursor:pointer;margin-top:8px;}
 
   /* SHARE MODAL */
-  .share-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:600;
-    align-items:flex-end;justify-content:center;}
+  .share-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:600;align-items:center;justify-content:center;}
   .share-modal.open{display:flex;}
   .share-box{background:#0d1f3c;border:1px solid var(--border);border-radius:20px 20px 0 0;
     width:100%;max-width:480px;padding:20px 16px 32px;max-height:85vh;overflow-y:auto;}
@@ -172,12 +187,12 @@
   .save-slot:hover{border-color:var(--accent);}
   .save-slot-num{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--accent);width:20px;}
   .save-slot-info{flex:1;}
-  .save-slot-name{font-size:13px;font-weight:600;}
+  .save-slot-name{font-size:13px;font-weight:600; color:#ffffff;}
   .save-slot-meta{font-size:10px;color:var(--silver);opacity:0.55;margin-top:1px;}
   .save-slot-empty{font-size:12px;color:var(--silver);opacity:0.35;font-style:italic;}
   .save-slot-del{background:none;border:none;color:var(--negative);opacity:0.5;font-size:14px;cursor:pointer;padding:2px 4px;}
   .save-slot-del:hover{opacity:1;}
-  .save-mode-title{font-size:12px;color:var(--silver);opacity:0.6;margin-bottom:6px;text-align:center;}
+  .save-mode-title{font-size:12px;color:var(--silver);margin-bottom:6px;}
 
   /* SCORE PANEL */
   .score-panel{margin:14px 12px 0;
@@ -270,6 +285,107 @@
   .modal-jump-btn.disabled{opacity:0.3;cursor:not-allowed;}
   .modal-bv{font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--gold);}
   .modal-euler{background:rgba(255,214,10,0.08);border-color:rgba(255,214,10,0.3);}
+  
+  /* DESKTOP LAYOUT */
+	@media (min-width: 768px){
+
+	  body{
+		padding:0;
+		background:linear-gradient(180deg,#07111f,#0a1628);
+	  }
+
+	  .app{
+		width:100%;
+		max-width:1600px;
+		margin:0 auto;
+		padding-bottom:140px;
+	  }
+
+	  header{
+		border-radius:0 0 24px 24px;
+	  }
+
+	  .section{
+		margin:20px 20px 0;
+	  }
+
+	  .elements-sticky{
+		padding-left:20px;
+		padding-right:20px;
+	  }
+
+	  .elements-scroll{
+		padding:20px;
+		overflow-y:auto;
+	  }
+
+	  /* 2 COLUMN GRID */
+	  #elementsList{
+		display:grid;
+		grid-template-columns:repeat(2,minmax(0,1fr));
+		gap:18px;
+		align-items:start;
+	  }
+
+	  .element-card{
+		margin-bottom:0;
+	  }
+
+	  /* FULL WIDTH FOOTBAR */
+	  .bottom-nav{
+		left:0;
+		transform:none;
+		max-width:none;
+		width:100%;
+		padding:12px 24px 20px;
+		justify-content:center;
+		gap:10px;
+		background:rgba(13,31,60,0.95);
+		backdrop-filter:blur(18px);
+	  }
+
+	  .nav-btn{
+		max-width:160px;
+		min-height:70px;
+	  }
+
+	  /* CONTENT NOT HIDDEN */
+	  #page-elements.active{
+		height:auto;
+		min-height:100vh;
+		padding-bottom:140px;
+	  }
+	}
+
+	/* MOBILE KEEP ORIGINAL */
+	@media (max-width: 767px){
+
+	  body{
+		padding:0;
+	  }
+
+	  .app{
+		max-width:480px;
+		padding-bottom:100px;
+	  }
+
+	  #elementsList{
+		display:block;
+	  }
+
+	  .bottom-nav{
+		left:50%;
+		transform:translateX(-50%);
+		max-width:480px;
+	  }
+	}
+	.element-card,
+	.program-item,
+	.combo-builder,
+	.pcs-item{
+	  color:#ffffff;
+	}
+  
 </style>
 </head>
 <body>
@@ -281,14 +397,14 @@
       <div class="logo">ISU <span>SCORE</span></div>
       <div class="header-sub">Figure Skating Calculator</div>
     </div>
-    <div class="comm-badge">Comm. 2786 · 2026/27</div>
-  </div>
-  <div class="tab-group" id="catTabs">
-    <button class="tab active" onclick="setCategory('recreational',this)">Recreational</button>
-    <button class="tab" onclick="setCategory('adult',this)">Adult</button>
-    <button class="tab" onclick="setCategory('novice',this)">Novice</button>
-    <button class="tab" onclick="setCategory('junior',this)">Junior</button>
-    <button class="tab" onclick="setCategory('senior',this)">Senior</button>
+	<a 
+	  class="comm-badge"
+	  href="https://isu-d8g8b4b7ece7aphs.a03.azurefd.net/isudamcontainer/CMS/Corporate-Site/Governance/Transparency/ISU-Communications/2786-SinglesPairs-SOV-2026-27-updated-26-05-08-1778227839-8725.pdf"
+	  target="_blank"
+	  rel="noopener noreferrer"
+	>
+	  Comm. 2786 · 2026/27
+	</a>
   </div>
 </header>
 
@@ -381,6 +497,24 @@
     <button class="btn-reset" onclick="resetProgram()">🗑 Clear Program</button>
     <!-- Save panel -->
     <div id="savePanel" style="display:none;margin-top:10px;">
+	<div style="font-size:12px;color:var(--silver);;margin-bottom:6px; ">Save As</div>
+	  <input
+		  type="text"
+		  id="saveProgramName"
+		  placeholder="Enter program name..."
+		  style="
+			width:100%;
+			margin-bottom:10px;
+			background:rgba(255,255,255,0.06);
+			border:1px solid var(--border);
+			border-radius:10px;
+			color:#fff;
+			padding:10px 12px;
+			font-size:13px;
+			font-family:'DM Sans',sans-serif;
+			outline:none;
+		  "
+		>
       <div class="save-mode-title">Select a slot to save current program:</div>
       <div class="save-slots" id="saveSlotsContainer"></div>
     </div>
@@ -432,33 +566,13 @@
 <div class="share-modal" id="shareModal" onclick="closeShareOutside(event)">
   <div class="share-box">
     <div class="share-title">🔗 Share Program</div>
-    <div class="share-sub">Send your program to anyone — no login needed</div>
-
-    <!-- SECTION 1: URL share (works when hosted) -->
-    <div class="share-section-title">Via Link (requires web hosting)</div>
+    <div class="share-sub"> Send your program to anyone — no login needed  </div>
+    <div class="share-section-title"> Share Link </div>
     <div class="share-url-box">
       <input class="share-url-input" id="shareUrlInput" readonly>
-      <button class="btn-copy-url" onclick="copyShareUrl()">Copy</button>
+      <button class="btn-copy-url" onclick="copyShareUrl()"> Copy </button>
     </div>
-    <div class="share-info">
-      ℹ️ Works best when the app is hosted online (Vercel/Netlify).
-      If opened as a local file, copy the <b>Share Code</b> below instead.
-    </div>
-
-    <!-- DIVIDER -->
-    <div class="share-divider"><span class="share-divider-text">OR USE SHARE CODE</span></div>
-
-    <!-- SECTION 2: Export code -->
-    <div class="share-section-title">📤 Export — Copy this code & send it</div>
-    <div class="code-box" id="exportCodeBox"></div>
-    <button class="btn-copy-url" style="width:100%;margin-bottom:14px;" onclick="copyExportCode()">📋 Copy Share Code</button>
-
-    <!-- SECTION 3: Import code -->
-    <div class="share-section-title">📥 Import — Paste a code received from someone</div>
-    <textarea class="import-input" id="importCodeInput" placeholder="Paste share code here..."></textarea>
-    <button class="btn-import" onclick="importCode()">Load Program from Code</button>
-
-    <button class="btn-share-close" onclick="closeShareModal()">Close</button>
+    <button class="btn-share-close" onclick="closeShareModal()"> Close  </button>
   </div>
 </div>
 
@@ -1277,48 +1391,121 @@ function openLoadPanel() {
 }
 
 function renderSaveSlots(mode) {
-  const containerId = mode === 'save' ? 'saveSlotsContainer' : 'loadSlotsContainer';
-  const container = document.getElementById(containerId);
+
+  const containerId =
+    mode === 'save'
+      ? 'saveSlotsContainer'
+      : 'loadSlotsContainer';
+
+  const container =
+    document.getElementById(containerId);
+
   let html = '';
+
   for (let i = 1; i <= SAVE_SLOTS; i++) {
-    const raw = localStorage.getItem(SAVE_KEY + i);
-    const saved = raw ? JSON.parse(raw) : null;
+
+    const raw =
+      localStorage.getItem(SAVE_KEY + i);
+
+    const saved =
+      raw ? JSON.parse(raw) : null;
+
     if (saved) {
-      html += `<div class="save-slot" onclick="${mode}ToSlot(${i})">
-        <div class="save-slot-num">${i}</div>
-        <div class="save-slot-info">
-          <div class="save-slot-name">${saved.category?.toUpperCase()} · ${saved.programType} · ${saved.elementCount} elements</div>
-          <div class="save-slot-meta">TES ${saved.tes?.toFixed(2)} · Saved ${saved.savedAt}</div>
+
+      const saveName =
+        saved.name ||
+        'Saved Program';
+
+      html += `
+        <div class="save-slot" onclick="${mode}ToSlot(${i})">
+
+          <div class="save-slot-num">${i}</div>
+
+          <div class="save-slot-info">
+            <div class="save-slot-name">
+              ${saveName}
+            </div>
+
+            <div class="save-slot-meta">
+              Saved program
+            </div>
+          </div>
+
+          <button
+            class="save-slot-del"
+            onclick="deleteSlot(event,${i})"
+            title="Delete"
+          >
+            🗑
+          </button>
+
         </div>
-        <button class="save-slot-del" onclick="deleteSlot(event,${i})" title="Delete">🗑</button>
-      </div>`;
+      `;
+
     } else {
-      html += `<div class="save-slot" onclick="${mode}ToSlot(${i})">
-        <div class="save-slot-num">${i}</div>
-        <div class="save-slot-empty">Empty slot</div>
-      </div>`;
+
+      html += `
+        <div class="save-slot"
+             onclick="${mode}ToSlot(${i})">
+
+          <div class="save-slot-num">${i}</div>
+
+          <div class="save-slot-empty">
+            Empty slot
+          </div>
+
+        </div>
+      `;
     }
   }
+
   container.innerHTML = html;
 }
 
 function saveToSlot(slot) {
-  if (!state.program.length) { showToast('No elements to save!'); return; }
-  localStorage.setItem(SAVE_KEY + slot, serializeProgram());
+
+  if (!state.program.length) {
+    showToast('No elements to save!');
+    return;
+  }
+
+  const customName =
+    document.getElementById('saveProgramName')?.value.trim();
+
+  const saveData = {
+    name:
+      customName ||
+      `${state.category} ${state.programType} ${state.program.length} elements`,
+    data: serializeProgram()
+  };
+
+  localStorage.setItem(
+    SAVE_KEY + slot,
+    JSON.stringify(saveData)
+  );
+
   showToast(`✅ Saved to slot ${slot}`);
+
   document.getElementById('savePanel').style.display = 'none';
 }
 
 function loadToSlot(slot) {
   const raw = localStorage.getItem(SAVE_KEY + slot);
   if (!raw) { showToast('Slot is empty'); return; }
-  const saved = JSON.parse(raw);
-  state.program = saved.program || [];
-  state.category = saved.category || 'recreational';
-  state.programType = saved.programType || 'SP';
-  state.gender = saved.gender || 'men';
-  state.pcs = saved.pcs || {sk:7,tr:7,pe:7,co:7,in:7};
-  state.deductions = saved.deductions || {};
+  
+	const saved = JSON.parse(raw);
+	const parsed =
+	  typeof saved.data === 'string'
+		? JSON.parse(saved.data)
+		: saved;
+
+	state.program = parsed.program || [];
+	state.category = parsed.category || 'recreational';
+	state.programType = parsed.programType || 'SP';
+	state.gender = parsed.gender || 'men';
+	state.pcs = parsed.pcs || {sk:7,tr:7,pe:7,co:7,in:7};
+	state.deductions = parsed.deductions || {};
+  
   // Sync category tabs
   document.querySelectorAll('#catTabs .tab').forEach(t => t.classList.remove('active'));
   const tabs = document.querySelectorAll('#catTabs .tab');
@@ -1369,15 +1556,14 @@ function buildShareUrl() {
 }
 
 function openShareModal() {
+
   if (!state.program.length) {
     showToast('Add elements first!');
     return;
   }
-  const code = encodeProgram();
+
   const url = buildShareUrl();
   document.getElementById('shareUrlInput').value = url;
-  document.getElementById('exportCodeBox').textContent = code;
-  document.getElementById('importCodeInput').value = '';
   document.getElementById('shareModal').classList.add('open');
 }
 
@@ -1389,15 +1575,19 @@ function closeShareOutside(e) {
   if (e.target.id === 'shareModal') closeShareModal();
 }
 
-function copyShareUrl() {
+async function copyShareUrl() {
   const val = document.getElementById('shareUrlInput').value;
-  navigator.clipboard.writeText(val).then(() => {
+  try {
+    await navigator.clipboard.writeText(val);
     showToast('✅ Link copied!');
-  }).catch(() => {
-    document.getElementById('shareUrlInput').select();
+    closeShareModal();
+  } catch {
+    const input = document.getElementById('shareUrlInput');
+    input.select();
     document.execCommand('copy');
     showToast('✅ Link copied!');
-  });
+    closeShareModal();
+  }
 }
 
 function copyExportCode() {
@@ -1444,10 +1634,21 @@ function applyLoadedState(data) {
 function checkUrlForProgram() {
   const params = new URLSearchParams(window.location.search);
   const encoded = params.get('program');
+
   if (!encoded) return;
+
   const data = decodeProgram(encoded);
+
   if (!data) return;
+
   applyLoadedState(data);
+
+  // Open Program page
+  const programBtn = [...document.querySelectorAll('.nav-btn')]
+    .find(btn => btn.textContent.includes('Program'));
+
+  showPage('program', programBtn);
+
   showToast('📂 Program loaded from shared link!');
 }
 
