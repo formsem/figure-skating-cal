@@ -456,7 +456,7 @@
 </nav>
 
 <!-- ELEMENTS PAGE -->
-<div class="page active" id="page-elements">
+<div class="page" id="page-elements">
   <div class="elements-sticky">
     <div class="search-box">
       <input class="search-input" type="search" placeholder="Search element..." id="searchInput" oninput="filterElements()">
@@ -1703,30 +1703,33 @@ function applyLoadedState(data) {
 function checkUrlForProgram() {
   const params = new URLSearchParams(window.location.search);
   const encoded = params.get('program');
-
-  if (!encoded) return;
-
+  if (!encoded) return false;
   const data = decodeProgram(encoded);
-
-  if (!data) return;
-
+  if (!data) return false;
   applyLoadedState(data);
-
-  // Open Program page
-  const programBtn = [...document.querySelectorAll('.nav-btn')]
-    .find(btn => btn.textContent.includes('Program'));
-
-  showPage('program', programBtn);
-
-  showToast('📂 Program loaded from shared link!');
+  return true;
 }
 
 // ─── INIT ───
-checkUrlForProgram();
+const _urlLoaded = checkUrlForProgram();
 renderAll();
 renderComboSlots();
 renderComboGOE();
 renderComboPreview();
+
+// Tentukan halaman awal berdasarkan URL
+if (_urlLoaded) {
+  // Ada parameter program → buka halaman Program
+  const _programBtn = [...document.querySelectorAll('.nav-btn')]
+    .find(btn => btn.textContent.includes('Program'));
+  showPage('program', _programBtn);
+  showToast('📂 Program loaded from shared link!');
+} else {
+  // Tidak ada parameter → buka halaman Elements (default)
+  const _elementsBtn = [...document.querySelectorAll('.nav-btn')]
+    .find(btn => btn.textContent.includes('Elements'));
+  showPage('elements', _elementsBtn);
+}			   
 </script>
 </body>
 </html>
