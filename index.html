@@ -1266,24 +1266,6 @@ function renderTotal() {
   document.getElementById('totalPCS').textContent=pcs.toFixed(2);
   document.getElementById('totalDED').textContent=`-${ded.toFixed(2)}`;
   document.getElementById('grandTotal').textContent=total.toFixed(2);
-
-  let html='';
-  state.program.forEach((item,idx)=>{
-    const score=item.isCombo?comboScore(item):elementScore(item);
-    let name=item.isCombo?item.label:item.element.id;
-    let bvStr=item.isCombo?item.comboJumps.reduce((s,j)=>s+(j?j.bv:0),0).toFixed(2):item.element.bv.toFixed(2);
-    const n=parseInt(item.goe);
-    const gc=n>0?'var(--positive)':(n<0?'var(--negative)':'var(--silver)');
-    html+=`<div class="program-item">
-      <div class="prog-num">${idx+1}</div>
-      <div class="prog-info">
-        <div class="prog-name">${name}</div>
-        <div class="prog-detail">BV ${bvStr} <span style="color:${gc};">GOE ${n>=0?'+':''}${item.goe}</span>${item.secondHalf?'<span style="color:var(--accent);"> ×1.1</span>':''}</div>
-      </div>
-      <div class="prog-score">${score.toFixed(2)}</div>
-    </div>`;
-  });
-  bd.innerHTML=html;
 }
 
 // ─── PROGRAM NAME DISPLAY ───
@@ -1711,25 +1693,30 @@ function checkUrlForProgram() {
 }
 
 // ─── INIT ───
-const _urlLoaded = checkUrlForProgram();
-renderAll();
-renderComboSlots();
-renderComboGOE();
-renderComboPreview();
+(function() {
+  const _urlLoaded = checkUrlForProgram();
+  renderAll();
+  renderComboSlots();
+  renderComboGOE();
+  renderComboPreview();
 
-// Tentukan halaman awal berdasarkan URL
-if (_urlLoaded) {
-  // Ada parameter program → buka halaman Program
-  const _programBtn = [...document.querySelectorAll('.nav-btn')]
-    .find(btn => btn.textContent.includes('Program'));
-  showPage('program', _programBtn);
-  showToast('📂 Program loaded from shared link!');
-} else {
-  // Tidak ada parameter → buka halaman Elements (default)
-  const _elementsBtn = [...document.querySelectorAll('.nav-btn')]
-    .find(btn => btn.textContent.includes('Elements'));
-  showPage('elements', _elementsBtn);
-}			   
+  function findNavBtn(label) {
+    const btns = document.querySelectorAll('.nav-btn');
+    for (let i = 0; i < btns.length; i++) {
+      if (btns[i].textContent.trim().includes(label)) return btns[i];
+    }
+    return null;
+  }
+
+  if (_urlLoaded) {
+    const btn = findNavBtn('Program');
+    showPage('program', btn);
+    showToast('📂 Program loaded from shared link!');
+  } else {
+    const btn = findNavBtn('Elements');
+    showPage('elements', btn);
+  }
+})();		   
 </script>
 </body>
 </html>
