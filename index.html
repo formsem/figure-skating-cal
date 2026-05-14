@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>ISU Score Calculator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap');
+  :root {
+    --deep:#0a1628; --accent:#00b4d8; --gold:#ffd60a; --silver:#cdd6f4;
+    --glass:rgba(255,255,255,0.07); --border:rgba(255,255,255,0.12);
+    --positive:#4caf50; --negative:#ef5350;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{font-family:'DM Sans',sans-serif;background:var(--deep);color:#fff;min-height:100vh;overflow-x:hidden;}
+  body::before{content:'';position:fixed;inset:0;
+    background:radial-gradient(ellipse at 20% 10%,rgba(0,180,216,0.15) 0%,transparent 50%),
+               radial-gradient(ellipse at 80% 80%,rgba(21,101,192,0.2) 0%,transparent 50%);
+    pointer-events:none;z-index:0;}
+  .app{position:relative;z-index:1;max-width:480px;margin:0 auto;padding-bottom:100px;}
+
+  header{background:linear-gradient(135deg,#0d1f3c,#112240);border-bottom:1px solid var(--border);
+    padding:14px 16px 12px;position:sticky;top:0;z-index:100;backdrop-filter:blur(20px);}
+  .header-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;}
+  .logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:var(--accent);line-height:1;}
+  .logo span{color:var(--gold);}
+  .header-sub{font-size:10px;color:var(--silver);opacity:0.6;text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+  .comm-badge{font-size:10px;background:rgba(255,214,10,0.15);border:1px solid rgba(255,214,10,0.4);
+    color:var(--gold);border-radius:6px;padding:3px 8px;white-space:nowrap;}
+
+  .tab-group{display:flex;gap:5px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;}
+  .tab-group::-webkit-scrollbar{display:none;}
+  .tab{padding:5px 11px;border-radius:20px;font-size:11px;font-weight:500;
+    border:1px solid var(--border);background:transparent;color:var(--silver);
+    cursor:pointer;white-space:nowrap;transition:all 0.2s;}
+  .tab.active{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600;}
+
+  .section{margin:12px 12px 0;}
+  .section-title{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1.5px;
+    color:var(--accent);margin-bottom:9px;display:flex;align-items:center;gap:8px;}
+  .section-title::after{content:'';flex:1;height:1px;background:var(--border);}
+
+  /* ELEMENT CARD */
+  .element-card{background:var(--glass);border:1px solid var(--border);
+    border-radius:13px;padding:11px;margin-bottom:7px;display:flex;flex-direction:column;gap:8px;}
+  .element-top{display:flex;align-items:center;gap:8px;}
+  .element-name{font-weight:600;font-size:13px;flex:1;}
+  .element-bv{font-family:'Bebas Neue',sans-serif;font-size:17px;color:var(--gold);
+    background:rgba(255,214,10,0.1);border-radius:7px;padding:2px 9px;}
+  .goe-row{display:flex;align-items:center;gap:5px;}
+  .goe-label{font-size:10px;color:var(--silver);opacity:0.6;width:30px;}
+  .goe-buttons{display:flex;gap:2px;flex:1;}
+  .goe-btn{flex:1;height:24px;border-radius:5px;border:1px solid var(--border);
+    background:transparent;font-size:9px;font-weight:700;cursor:pointer;transition:all 0.15s;}
+  .goe-btn.neg{color:#ef5350;} .goe-btn.pos{color:#4caf50;} .goe-btn.zero{color:var(--silver);}
+  .goe-btn.selected{border-color:currentColor;background:rgba(255,255,255,0.1);transform:scale(1.1);}
+  .goe-btn.selected.neg{background:rgba(239,83,80,0.15);}
+  .goe-btn.selected.pos{background:rgba(76,175,80,0.15);}
+  .elem-actions{display:flex;gap:6px;}
+  .btn-add{flex:1;padding:7px;border-radius:9px;border:none;background:var(--accent);
+    color:#fff;font-weight:600;font-size:12px;cursor:pointer;transition:all 0.2s;}
+  .btn-add:active{transform:scale(0.96);}
+  .btn-combo-add{padding:7px 10px;border-radius:9px;border:1px solid var(--gold);
+    background:rgba(255,214,10,0.1);color:var(--gold);font-weight:600;font-size:11px;
+    cursor:pointer;white-space:nowrap;}
+
+  /* COMBO BUILDER */
+  .combo-builder{background:rgba(255,214,10,0.05);border:1px solid rgba(255,214,10,0.25);
+    border-radius:16px;padding:14px;margin:12px 12px 0;}
+  .combo-title{font-family:'Bebas Neue',sans-serif;font-size:17px;color:var(--gold);
+    letter-spacing:1px;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+  .combo-slots{display:flex;align-items:center;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
+  .combo-slot{flex:1;min-width:70px;background:var(--glass);border:1px dashed rgba(255,214,10,0.3);
+    border-radius:10px;padding:8px 6px;text-align:center;cursor:pointer;transition:all 0.2s;
+    min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .combo-slot.filled{border-style:solid;border-color:rgba(255,214,10,0.5);background:rgba(255,214,10,0.08);}
+  .combo-slot.active-select{border-color:var(--accent);background:rgba(0,180,216,0.1);}
+  .combo-slot-name{font-weight:700;font-size:13px;color:var(--gold);}
+  .combo-slot-bv{font-size:10px;color:var(--silver);opacity:0.7;margin-top:2px;}
+  .combo-slot-empty{font-size:10px;color:var(--silver);opacity:0.4;}
+  .combo-plus{font-size:18px;color:var(--silver);opacity:0.4;flex-shrink:0;}
+  .combo-slot .remove-x{font-size:10px;color:var(--negative);margin-top:3px;cursor:pointer;}
+
+  .combo-goe-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+  .combo-goe-label{font-size:11px;color:var(--silver);opacity:0.7;white-space:nowrap;}
+  .combo-info{font-size:11px;color:var(--silver);opacity:0.65;margin-bottom:10px;line-height:1.5;}
+  .combo-total{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold);}
+  .btn-add-combo{width:100%;padding:9px;border-radius:10px;border:none;
+    background:linear-gradient(135deg,rgba(255,214,10,0.3),rgba(255,214,10,0.15));
+    color:var(--gold);font-weight:700;font-size:13px;cursor:pointer;
+    border:1px solid rgba(255,214,10,0.4);}
+  .btn-add-combo:disabled{opacity:0.3;cursor:not-allowed;}
+  .btn-clear-combo{width:100%;padding:7px;border-radius:9px;border:1px solid var(--border);
+    background:transparent;color:var(--silver);font-size:12px;cursor:pointer;margin-top:6px;}
+
+  /* SECOND HALF TOGGLE */
+  .sh-toggle{display:flex;align-items:center;gap:8px;padding:8px 12px;
+    background:var(--glass);border:1px solid var(--border);border-radius:10px;
+    cursor:pointer;margin-bottom:8px;}
+  .sh-toggle input{accent-color:var(--accent);width:16px;height:16px;}
+  .sh-label{font-size:12px;color:var(--silver);}
+  .sh-bonus{font-size:11px;color:var(--accent);font-weight:600;}
+
+  /* PROGRAM LIST */
+  .program-list{background:var(--glass);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+  .program-item{display:flex;align-items:center;padding:10px 13px;gap:9px;border-bottom:1px solid var(--border);
+    transition:background 0.15s,opacity 0.15s;}
+  .program-item:last-child{border-bottom:none;}
+  .program-item.dragging{opacity:0.35;background:rgba(0,180,216,0.08);}
+  .program-item.drag-over{background:rgba(0,180,216,0.12);border-top:2px solid var(--accent);}
+  .drag-handle{color:var(--silver);opacity:0.3;font-size:18px;cursor:grab;flex-shrink:0;touch-action:none;}
+  .prog-num{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--silver);opacity:0.35;width:18px;}
+  .prog-info{flex:1;}
+  .prog-name{font-weight:700;font-size:14px;}
+  .prog-detail{font-size:10px;color:var(--silver);opacity:0.6;margin-top:1px;}
+  .prog-badges{display:flex;gap:4px;margin-top:3px;flex-wrap:wrap;}
+  .badge{font-size:9px;padding:1px 6px;border-radius:4px;font-weight:600;}
+  .badge-combo{background:rgba(255,214,10,0.15);color:var(--gold);border:1px solid rgba(255,214,10,0.3);}
+  .badge-sh{background:rgba(0,180,216,0.15);color:var(--accent);border:1px solid rgba(0,180,216,0.3);}
+  .badge-rep{background:rgba(239,83,80,0.15);color:var(--negative);border:1px solid rgba(239,83,80,0.3);}
+  .prog-score{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold);}
+  .prog-actions{display:flex;align-items:center;gap:2px;}
+  .prog-move{background:none;border:none;color:var(--silver);opacity:0.4;font-size:15px;
+    cursor:pointer;padding:3px 5px;line-height:1;border-radius:6px;}
+  .prog-move:active{opacity:1;background:rgba(255,255,255,0.1);}
+  .prog-remove{background:none;border:none;color:var(--negative);font-size:15px;cursor:pointer;padding:3px 5px;border-radius:6px;}
+
+  /* SAVE BUTTONS */
+  .save-row{display:flex;gap:8px;margin-top:10px;}
+  .btn-share{width:100%;padding:10px;border-radius:11px;border:1px solid rgba(76,175,80,0.4);
+    background:rgba(76,175,80,0.1);color:#4caf50;font-weight:600;font-size:13px;cursor:pointer;margin-top:8px;}
+
+  /* SHARE MODAL */
+  .share-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:600;
+    align-items:flex-end;justify-content:center;}
+  .share-modal.open{display:flex;}
+  .share-box{background:#0d1f3c;border:1px solid var(--border);border-radius:20px 20px 0 0;
+    width:100%;max-width:480px;padding:20px 16px 32px;max-height:85vh;overflow-y:auto;}
+  .share-title{font-family:'Bebas Neue',sans-serif;font-size:20px;color:#4caf50;letter-spacing:1px;margin-bottom:4px;}
+  .share-sub{font-size:12px;color:var(--silver);opacity:0.6;margin-bottom:14px;}
+  .share-url-box{display:flex;gap:8px;margin-bottom:12px;}
+  .share-url-input{flex:1;background:rgba(255,255,255,0.06);border:1px solid var(--border);
+    border-radius:10px;color:var(--silver);padding:9px 12px;font-size:11px;font-family:'DM Sans',sans-serif;
+    outline:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .btn-copy-url{padding:9px 14px;border-radius:10px;border:none;background:var(--accent);
+    color:#fff;font-weight:700;font-size:12px;cursor:pointer;white-space:nowrap;}
+  .share-info{font-size:11px;color:var(--silver);opacity:0.55;line-height:1.6;
+    background:rgba(255,255,255,0.04);border-radius:10px;padding:10px 12px;margin-bottom:12px;}
+  .share-divider{display:flex;align-items:center;gap:10px;margin:14px 0;}
+  .share-divider::before,.share-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+  .share-divider-text{font-size:11px;color:var(--silver);opacity:0.4;white-space:nowrap;}
+  .code-box{background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:10px;
+    padding:10px 12px;font-size:10px;font-family:monospace;color:var(--silver);
+    word-break:break-all;line-height:1.5;max-height:80px;overflow-y:auto;margin-bottom:8px;}
+  .import-input{width:100%;background:rgba(255,255,255,0.06);border:1px solid var(--border);
+    border-radius:10px;color:#fff;padding:9px 12px;font-size:11px;font-family:monospace;
+    outline:none;margin-bottom:8px;resize:none;height:70px;}
+  .import-input:focus{border-color:var(--accent);}
+  .btn-import{width:100%;padding:9px;border-radius:10px;border:none;
+    background:rgba(0,180,216,0.2);color:var(--accent);font-weight:700;font-size:13px;cursor:pointer;
+    border:1px solid rgba(0,180,216,0.4);}
+  .share-section-title{font-size:12px;font-weight:600;color:#fff;margin-bottom:8px;}
+  .btn-share-close{width:100%;padding:10px;border-radius:11px;border:1px solid var(--border);
+    background:transparent;color:var(--silver);font-size:13px;cursor:pointer;margin-top:4px;}
+  .btn-save{flex:1;padding:10px;border-radius:11px;border:1px solid rgba(0,180,216,0.4);
+    background:rgba(0,180,216,0.1);color:var(--accent);font-weight:600;font-size:13px;cursor:pointer;}
+  .btn-load{flex:1;padding:10px;border-radius:11px;border:1px solid rgba(255,214,10,0.4);
+    background:rgba(255,214,10,0.08);color:var(--gold);font-weight:600;font-size:13px;cursor:pointer;}
+  .save-slots{margin-top:8px;display:flex;flex-direction:column;gap:6px;}
+  .save-slot{display:flex;align-items:center;gap:8px;background:var(--glass);border:1px solid var(--border);
+    border-radius:10px;padding:9px 12px;cursor:pointer;transition:border-color 0.2s;}
+  .save-slot:hover{border-color:var(--accent);}
+  .save-slot-num{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--accent);width:20px;}
+  .save-slot-info{flex:1;}
+  .save-slot-name{font-size:13px;font-weight:600;}
+  .save-slot-meta{font-size:10px;color:var(--silver);opacity:0.55;margin-top:1px;}
+  .save-slot-empty{font-size:12px;color:var(--silver);opacity:0.35;font-style:italic;}
+  .save-slot-del{background:none;border:none;color:var(--negative);opacity:0.5;font-size:14px;cursor:pointer;padding:2px 4px;}
+  .save-slot-del:hover{opacity:1;}
+  .save-mode-title{font-size:12px;color:var(--silver);opacity:0.6;margin-bottom:6px;text-align:center;}
+
+  /* SCORE PANEL */
+  .score-panel{margin:14px 12px 0;
+    background:linear-gradient(135deg,rgba(0,180,216,0.08),rgba(21,101,192,0.1));
+    border:1px solid rgba(0,180,216,0.3);border-radius:18px;padding:18px;}
+  .score-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+  .score-label{font-size:12px;color:var(--silver);opacity:0.8;}
+  .score-val{font-family:'Bebas Neue',sans-serif;font-size:20px;color:#fff;}
+  .score-divider{height:1px;background:var(--border);margin:10px 0;}
+  .total-label{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;color:var(--accent);}
+  .total-val{font-family:'Bebas Neue',sans-serif;font-size:34px;color:var(--gold);line-height:1;}
+
+  /* PCS */
+  .pcs-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+  .pcs-item{background:var(--glass);border:1px solid var(--border);border-radius:11px;padding:10px;}
+  .pcs-name{font-size:10px;color:var(--silver);opacity:0.6;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;}
+  .pcs-slider{width:100%;accent-color:var(--accent);cursor:pointer;}
+  .pcs-val{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--accent);margin-top:2px;}
+  .pcs-factor{font-size:9px;color:var(--silver);opacity:0.4;margin-top:1px;}
+  .ded-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
+  .ded-name{font-size:12px;}
+  .ded-counter{display:flex;align-items:center;gap:8px;}
+  .ded-btn{width:26px;height:26px;border-radius:7px;border:1px solid var(--border);background:var(--glass);color:#fff;font-size:15px;cursor:pointer;}
+  .ded-count{font-family:'Bebas Neue',sans-serif;font-size:19px;width:20px;text-align:center;color:var(--negative);}
+  .gender-row{display:flex;gap:7px;margin-bottom:10px;}
+  .gender-btn{flex:1;padding:7px;border-radius:9px;border:1px solid var(--border);
+    background:transparent;color:var(--silver);font-size:12px;font-weight:500;cursor:pointer;transition:all 0.2s;}
+  .gender-btn.active{background:rgba(0,180,216,0.14);border-color:var(--accent);color:var(--accent);}
+
+  /* BOTTOM NAV */
+  .bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+    width:100%;max-width:480px;background:#0d1f3c;border-top:1px solid var(--border);
+    display:flex;padding:8px 12px 18px;gap:3px;z-index:200;}
+  .nav-btn{flex:1;padding:7px 4px;border-radius:11px;border:none;background:transparent;
+    color:var(--silver);font-size:10px;font-weight:500;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:3px;transition:all 0.2s;}
+  .nav-btn.active{color:var(--accent);background:rgba(0,180,216,0.1);}
+  .nav-icon{font-size:19px;}
+
+  .empty{text-align:center;padding:26px 20px;color:var(--silver);opacity:0.4;}
+  .empty-icon{font-size:34px;margin-bottom:7px;}
+  .btn-reset{width:100%;padding:10px;border-radius:11px;border:1px solid rgba(239,83,80,0.3);
+    background:rgba(239,83,80,0.08);color:#ef5350;font-weight:600;font-size:13px;cursor:pointer;margin-top:9px;}
+
+  .page{display:none;}
+  .page.active{display:block;}
+  #page-elements.active{display:flex;flex-direction:column;height:calc(100vh - 120px);}
+  #page-elements .elements-scroll{flex:1;overflow-y:auto;}
+  .quint{border-left:3px solid #ff6b35;} .quad{border-left:3px solid var(--gold);}
+  .triple{border-left:3px solid var(--accent);} .double{border-left:3px solid rgba(255,255,255,0.3);}
+  .single{border-left:3px solid rgba(255,255,255,0.12);}
+  .euler-card{border-left:3px solid rgba(255,214,10,0.5);background:rgba(255,214,10,0.04);}
+
+  .search-box{display:flex;gap:7px;padding:10px 12px 0;}
+  .elements-sticky{position:sticky;top:0;z-index:50;background:var(--deep);
+    padding-bottom:8px;border-bottom:1px solid var(--border);}
+  .elements-scroll{overflow-y:auto;}
+  .search-input{flex:1;background:var(--glass);border:1px solid var(--border);border-radius:11px;
+    color:#fff;padding:8px 13px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;}
+  .search-input::placeholder{color:rgba(255,255,255,0.25);}
+  .search-input:focus{border-color:var(--accent);}
+  .filter-chip{padding:6px 12px;border-radius:11px;border:1px solid var(--border);
+    background:transparent;color:var(--silver);font-size:11px;cursor:pointer;white-space:nowrap;}
+  .filter-chip.active{background:rgba(0,180,216,0.14);border-color:var(--accent);color:var(--accent);}
+
+  /* JUMP PICKER MODAL */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;
+    display:flex;align-items:flex-end;justify-content:center;}
+  .modal-overlay.hidden{display:none;}
+  .modal{background:#0d1f3c;border:1px solid var(--border);border-radius:20px 20px 0 0;
+    width:100%;max-width:480px;max-height:75vh;overflow:hidden;display:flex;flex-direction:column;}
+  .modal-header{padding:16px 16px 10px;border-bottom:1px solid var(--border);flex-shrink:0;}
+  .modal-title{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--accent);letter-spacing:1px;}
+  .modal-sub{font-size:11px;color:var(--silver);opacity:0.6;margin-top:3px;}
+  .modal-close{float:right;background:none;border:none;color:var(--silver);font-size:20px;cursor:pointer;margin-top:-2px;}
+  .modal-search{width:100%;background:rgba(255,255,255,0.07);border:1px solid var(--border);
+    border-radius:10px;color:#fff;padding:8px 12px;font-size:13px;font-family:'DM Sans',sans-serif;
+    outline:none;margin-top:10px;}
+  .modal-search::placeholder{color:rgba(255,255,255,0.28);}
+  .modal-search:focus{border-color:var(--accent);}
+  .modal-body{overflow-y:auto;flex:1;padding:10px 12px 20px;}
+  .modal-jump-group{margin-bottom:12px;}
+  .modal-group-title{font-size:11px;color:var(--silver);opacity:0.5;text-transform:uppercase;
+    letter-spacing:1px;margin-bottom:6px;padding-left:2px;}
+  .modal-jump-btn{display:flex;align-items:center;justify-content:space-between;
+    width:100%;padding:9px 12px;border-radius:10px;border:1px solid var(--border);
+    background:var(--glass);color:#fff;font-size:13px;font-weight:600;cursor:pointer;
+    margin-bottom:5px;transition:all 0.15s;}
+  .modal-jump-btn:active{background:rgba(0,180,216,0.15);}
+  .modal-jump-btn.disabled{opacity:0.3;cursor:not-allowed;}
+  .modal-bv{font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--gold);}
+  .modal-euler{background:rgba(255,214,10,0.08);border-color:rgba(255,214,10,0.3);}
+</style>
+</head>
+<body>
+<div class="app">
+
+<header>
+  <div class="header-top">
+    <div>
+      <div class="logo">ISU <span>SCORE</span></div>
+      <div class="header-sub">Figure Skating Calculator</div>
+    </div>
+    <div class="comm-badge">Comm. 2786 · 2026/27</div>
+  </div>
+  <div class="tab-group" id="catTabs">
+    <button class="tab active" onclick="setCategory('recreational',this)">Recreational</button>
+    <button class="tab" onclick="setCategory('adult',this)">Adult</button>
+    <button class="tab" onclick="setCategory('novice',this)">Novice</button>
+    <button class="tab" onclick="setCategory('junior',this)">Junior</button>
+    <button class="tab" onclick="setCategory('senior',this)">Senior</button>
+  </div>
+</header>
+
+<nav class="bottom-nav">
+  <button class="nav-btn active" onclick="showPage('elements',this)"><span class="nav-icon">⛸</span>Elements</button>
+  <button class="nav-btn" onclick="showPage('combo',this)"><span class="nav-icon">🔗</span>Combo</button>
+  <button class="nav-btn" onclick="showPage('program',this)"><span class="nav-icon">📋</span>Program</button>
+  <button class="nav-btn" onclick="showPage('pcs',this)"><span class="nav-icon">⭐</span>PCS</button>
+  <button class="nav-btn" onclick="showPage('total',this)"><span class="nav-icon">🏆</span>Total</button>
+</nav>
+
+<!-- ELEMENTS PAGE -->
+<div class="page active" id="page-elements">
+  <div class="elements-sticky">
+    <div class="search-box">
+      <input class="search-input" type="search" placeholder="Search element..." id="searchInput" oninput="filterElements()">
+    </div>
+    <div class="tab-group" style="margin:7px 12px 0;">
+      <button class="filter-chip active" onclick="setFilter('all',this)">All</button>
+      <button class="filter-chip" onclick="setFilter('jump',this)">Jumps</button>
+      <button class="filter-chip" onclick="setFilter('spin',this)">Spins</button>
+      <button class="filter-chip" onclick="setFilter('step',this)">Steps</button>
+    </div>
+  </div>
+  <div class="elements-scroll">
+    <div id="elementsList" style="margin-top:6px;"></div>
+  </div>
+</div>
+
+<!-- COMBO PAGE -->
+<div class="page" id="page-combo">
+  <div class="combo-builder">
+    <div class="combo-title">🔗 Combo Jump Builder</div>
+
+    <!-- SLOTS -->
+    <div class="combo-slots" id="comboSlots">
+      <!-- rendered by JS -->
+    </div>
+
+    <!-- GOE -->
+    <div class="combo-goe-row">
+      <span class="combo-goe-label">GOE (hardest jump):</span>
+      <div class="goe-buttons" style="flex:1;">
+        <!-- rendered by JS -->
+      </div>
+    </div>
+
+    <!-- Second half toggle -->
+    <label class="sh-toggle">
+      <input type="checkbox" id="comboSH" onchange="renderComboPreview()">
+      <span class="sh-label">Second half program</span>
+      <span class="sh-bonus">+10% BV</span>
+    </label>
+
+    <!-- Preview -->
+    <div class="combo-info" id="comboInfo">Select a jump to start building your combo</div>
+
+    <button class="btn-add-combo" id="btnAddCombo" onclick="addComboToProgram()" disabled>+ Add Combo to Program</button>
+    <button class="btn-clear-combo" onclick="clearCombo()">🗑 Reset Combo</button>
+  </div>
+
+  <div class="section" style="margin-top:14px;">
+    <div class="section-title">About Combo Scoring</div>
+    <div style="font-size:12px;color:var(--silver);opacity:0.75;line-height:1.7;background:var(--glass);
+      border:1px solid var(--border);border-radius:12px;padding:12px;">
+      <div>• BV of all jumps in the combo are <b style="color:#fff;">added together</b></div>
+      <div>• GOE is applied from the <b style="color:#fff;">most difficult jump</b> in the combo</div>
+      <div>• <b style="color:var(--gold);">Euler (1Eu)</b> used as a connecting jump, BV = 0.00</div>
+      <div>• Element in 2nd half of program → BV × <b style="color:var(--accent);">1.1</b></div>
+      <div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.08);
+        font-size:10px;opacity:0.5;">
+        ⚠️ Program structure rules (max elements, which jumps are allowed per program type/level) 
+        are defined in ISU Special Regulations & Technical Panel Handbook — not in Comm. 2786.
+        Always verify with official ISU documents for competition use.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PROGRAM PAGE -->
+<div class="page" id="page-program">
+  <div class="section">
+    <div class="section-title">Program</div>
+    <div id="programList"></div>
+    <div class="save-row">
+      <button class="btn-save" onclick="openSavePanel()">💾 Save</button>
+      <button class="btn-load" onclick="openLoadPanel()">📂 Load</button>
+    </div>
+    <button class="btn-share" onclick="openShareModal()">🔗 Share Program via Link</button>
+    <button class="btn-reset" onclick="resetProgram()">🗑 Clear Program</button>
+    <!-- Save panel -->
+    <div id="savePanel" style="display:none;margin-top:10px;">
+      <div class="save-mode-title">Select a slot to save current program:</div>
+      <div class="save-slots" id="saveSlotsContainer"></div>
+    </div>
+    <!-- Load panel -->
+    <div id="loadPanel" style="display:none;margin-top:10px;">
+      <div class="save-mode-title">Select a slot to load:</div>
+      <div class="save-slots" id="loadSlotsContainer"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PCS PAGE -->
+<div class="page" id="page-pcs">
+  <div class="section">
+    <div class="section-title">Program Components</div>
+    <div style="display:flex;gap:7px;margin-bottom:9px;">
+      <button class="tab active" id="spBtn" onclick="setProgramType('SP')">Short Program</button>
+      <button class="tab" id="fsBtn" onclick="setProgramType('FS')">Free Skating</button>
+    </div>
+    <div class="gender-row">
+      <button class="gender-btn active" onclick="setGender('men',this)">Men</button>
+      <button class="gender-btn" onclick="setGender('women',this)">Women</button>
+    </div>
+    <div class="pcs-grid" id="pcsGrid"></div>
+    <div class="section-title" style="margin-top:13px;">Deductions</div>
+    <div id="deductionsList"></div>
+  </div>
+</div>
+
+<!-- TOTAL PAGE -->
+<div class="page" id="page-total">
+  <div class="section"><div class="section-title">Score Breakdown</div></div>
+  <div class="score-panel">
+    <div class="score-row"><span class="score-label">Total Element Score (TES)</span><span class="score-val" id="totalTES">0.00</span></div>
+    <div class="score-row"><span class="score-label">Program Components (PCS)</span><span class="score-val" id="totalPCS">0.00</span></div>
+    <div class="score-row"><span class="score-label">Deductions</span><span class="score-val" style="color:var(--negative);" id="totalDED">-0.00</span></div>
+    <div class="score-divider"></div>
+    <div class="score-row"><span class="total-label">TOTAL SCORE</span><span class="total-val" id="grandTotal">0.00</span></div>
+  </div>
+  <div class="section" style="margin-top:13px;">
+    <div class="section-title">Element Breakdown</div>
+    <div id="breakdownList" class="program-list"></div>
+  </div>
+</div>
+
+</div><!-- .app -->
+
+<!-- SHARE MODAL -->
+<div class="share-modal" id="shareModal" onclick="closeShareOutside(event)">
+  <div class="share-box">
+    <div class="share-title">🔗 Share Program</div>
+    <div class="share-sub">Send your program to anyone — no login needed</div>
+
+    <!-- SECTION 1: URL share (works when hosted) -->
+    <div class="share-section-title">Via Link (requires web hosting)</div>
+    <div class="share-url-box">
+      <input class="share-url-input" id="shareUrlInput" readonly>
+      <button class="btn-copy-url" onclick="copyShareUrl()">Copy</button>
+    </div>
+    <div class="share-info">
+      ℹ️ Works best when the app is hosted online (Vercel/Netlify).
+      If opened as a local file, copy the <b>Share Code</b> below instead.
+    </div>
+
+    <!-- DIVIDER -->
+    <div class="share-divider"><span class="share-divider-text">OR USE SHARE CODE</span></div>
+
+    <!-- SECTION 2: Export code -->
+    <div class="share-section-title">📤 Export — Copy this code & send it</div>
+    <div class="code-box" id="exportCodeBox"></div>
+    <button class="btn-copy-url" style="width:100%;margin-bottom:14px;" onclick="copyExportCode()">📋 Copy Share Code</button>
+
+    <!-- SECTION 3: Import code -->
+    <div class="share-section-title">📥 Import — Paste a code received from someone</div>
+    <textarea class="import-input" id="importCodeInput" placeholder="Paste share code here..."></textarea>
+    <button class="btn-import" onclick="importCode()">Load Program from Code</button>
+
+    <button class="btn-share-close" onclick="closeShareModal()">Close</button>
+  </div>
+</div>
+
+<!-- JUMP PICKER MODAL -->
+<div class="modal-overlay hidden" id="modalOverlay" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <div class="modal-title" id="modalTitle">Select Jump</div>
+      <div class="modal-sub" id="modalSub"></div>
+      <input class="modal-search" type="search" id="modalSearch" placeholder="Search jump... (e.g. 3A, Lutz, Axel)" oninput="filterModal()">
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// ISU Communication No. 2786 — Season 2026/27
+// ============================================================
+
+const JUMPS = [
+  // SINGLE
+  {id:'1T', name:'1 Toeloop', bv:0.40, level:'single', canThird:false},
+  {id:'1S', name:'1 Salchow', bv:0.40, level:'single', canThird:false},
+  {id:'1Lo',name:'1 Loop',    bv:0.50, level:'single', canThird:true},
+  {id:'1F', name:'1 Flip',    bv:0.50, level:'single', canThird:false},
+  {id:'1Lz',name:'1 Lutz',   bv:0.60, level:'single', canThird:false},
+  {id:'1A', name:'1 Axel',   bv:1.10, level:'single', canThird:false},
+  {id:'Eu', name:'Euler (½ Loop)', bv:0.00, level:'single', isEuler:true, canThird:false},
+  // DOUBLE
+  {id:'2T', name:'2 Toeloop', bv:1.30, level:'double', canThird:true},
+  {id:'2S', name:'2 Salchow', bv:1.30, level:'double', canThird:false},
+  {id:'2Lo',name:'2 Loop',    bv:1.70, level:'double', canThird:true},
+  {id:'2F', name:'2 Flip',    bv:1.80, level:'double', canThird:false},
+  {id:'2Lz',name:'2 Lutz',   bv:2.10, level:'double', canThird:false},
+  {id:'2A', name:'2 Axel',   bv:3.30, level:'double', canThird:false},
+  // TRIPLE
+  {id:'3T', name:'3 Toeloop', bv:4.20, level:'triple', canThird:true},
+  {id:'3S', name:'3 Salchow', bv:4.30, level:'triple', canThird:false},
+  {id:'3Lo',name:'3 Loop',    bv:4.90, level:'triple', canThird:true},
+  {id:'3F', name:'3 Flip',    bv:5.30, level:'triple', canThird:false},
+  {id:'3Lz',name:'3 Lutz',   bv:5.90, level:'triple', canThird:false},
+  {id:'3A', name:'3 Axel',   bv:8.00, level:'triple', canThird:false},
+  // QUAD
+  {id:'4T', name:'4 Toeloop', bv:9.50,  level:'quad', canThird:true},
+  {id:'4S', name:'4 Salchow', bv:9.70,  level:'quad', canThird:false},
+  {id:'4Lo',name:'4 Loop',    bv:10.50, level:'quad', canThird:true},
+  {id:'4F', name:'4 Flip',    bv:11.00, level:'quad', canThird:false},
+  {id:'4Lz',name:'4 Lutz',   bv:11.50, level:'quad', canThird:false},
+  {id:'4A', name:'4 Axel',   bv:12.50, level:'quad', canThird:false},
+  // QUINT
+  {id:'5T', name:'5 Toeloop', bv:14.00, level:'quint', canThird:false},
+  {id:'5S', name:'5 Salchow', bv:14.00, level:'quint', canThird:false},
+  {id:'5Lo',name:'5 Loop',    bv:14.00, level:'quint', canThird:false},
+  {id:'5F', name:'5 Flip',    bv:14.00, level:'quint', canThird:false},
+  {id:'5Lz',name:'5 Lutz',   bv:14.00, level:'quint', canThird:false},
+];
+
+const EULER = {id:'Eu', name:'Euler', bv:0.00, level:'single', isEuler:true};
+
+const SPINS = [
+  {id:'USpB',name:'Upright Spin Base',bv:1.20,type:'spin'},
+  {id:'USp1',name:'Upright Spin Lv1', bv:1.40,type:'spin'},
+  {id:'USp2',name:'Upright Spin Lv2', bv:1.80,type:'spin'},
+  {id:'USp3',name:'Upright Spin Lv3', bv:2.30,type:'spin'},
+  {id:'USp4',name:'Upright Spin Lv4', bv:2.90,type:'spin'},
+  {id:'LSpB',name:'Layback Spin Base',bv:1.40,type:'spin'},
+  {id:'LSp1',name:'Layback Spin Lv1', bv:1.80,type:'spin'},
+  {id:'LSp2',name:'Layback Spin Lv2', bv:2.30,type:'spin'},
+  {id:'LSp3',name:'Layback Spin Lv3', bv:2.90,type:'spin'},
+  {id:'LSp4',name:'Layback Spin Lv4', bv:3.20,type:'spin'},
+  {id:'CSpB',name:'Camel Spin Base',  bv:1.30,type:'spin'},
+  {id:'CSp1',name:'Camel Spin Lv1',   bv:1.70,type:'spin'},
+  {id:'CSp2',name:'Camel Spin Lv2',   bv:2.20,type:'spin'},
+  {id:'CSp3',name:'Camel Spin Lv3',   bv:2.80,type:'spin'},
+  {id:'CSp4',name:'Camel Spin Lv4',   bv:3.10,type:'spin'},
+  {id:'SSpB',name:'Sit Spin Base',    bv:1.30,type:'spin'},
+  {id:'SSp1',name:'Sit Spin Lv1',     bv:1.60,type:'spin'},
+  {id:'SSp2',name:'Sit Spin Lv2',     bv:1.90,type:'spin'},
+  {id:'SSp3',name:'Sit Spin Lv3',     bv:2.50,type:'spin'},
+  {id:'SSp4',name:'Sit Spin Lv4',     bv:3.00,type:'spin'},
+  {id:'FUSpB',name:'Flying Upright Base',bv:1.80,type:'spin'},
+  {id:'FUSp1',name:'Flying Upright Lv1', bv:2.00,type:'spin'},
+  {id:'FUSp2',name:'Flying Upright Lv2', bv:2.40,type:'spin'},
+  {id:'FUSp3',name:'Flying Upright Lv3', bv:2.90,type:'spin'},
+  {id:'FUSp4',name:'Flying Upright Lv4', bv:3.50,type:'spin'},
+  {id:'FLSpB',name:'Flying Layback Base',bv:2.00,type:'spin'},
+  {id:'FLSp1',name:'Flying Layback Lv1', bv:2.40,type:'spin'},
+  {id:'FLSp2',name:'Flying Layback Lv2', bv:2.90,type:'spin'},
+  {id:'FLSp3',name:'Flying Layback Lv3', bv:3.50,type:'spin'},
+  {id:'FLSp4',name:'Flying Layback Lv4', bv:3.80,type:'spin'},
+  {id:'FCSpB',name:'Flying Camel Base',  bv:1.90,type:'spin'},
+  {id:'FCSp1',name:'Flying Camel Lv1',   bv:2.30,type:'spin'},
+  {id:'FCSp2',name:'Flying Camel Lv2',   bv:2.80,type:'spin'},
+  {id:'FCSp3',name:'Flying Camel Lv3',   bv:3.40,type:'spin'},
+  {id:'FCSp4',name:'Flying Camel Lv4',   bv:3.80,type:'spin'},
+  {id:'FSSpB',name:'Flying Sit Base',    bv:2.00,type:'spin'},
+  {id:'FSSp1',name:'Flying Sit Lv1',     bv:2.40,type:'spin'},
+  {id:'FSSp2',name:'Flying Sit Lv2',     bv:2.80,type:'spin'},
+  {id:'FSSp3',name:'Flying Sit Lv3',     bv:3.10,type:'spin'},
+  {id:'FSSp4',name:'Flying Sit Lv4',     bv:3.60,type:'spin'},
+  {id:'CUSpB',name:'Change Upright Base',bv:1.80,type:'spin'},
+  {id:'CUSp1',name:'Change Upright Lv1', bv:2.00,type:'spin'},
+  {id:'CUSp2',name:'Change Upright Lv2', bv:2.40,type:'spin'},
+  {id:'CUSp3',name:'Change Upright Lv3', bv:2.90,type:'spin'},
+  {id:'CUSp4',name:'Change Upright Lv4', bv:3.50,type:'spin'},
+  {id:'CCSpB',name:'Change Camel Base',  bv:2.00,type:'spin'},
+  {id:'CCSp1',name:'Change Camel Lv1',   bv:2.40,type:'spin'},
+  {id:'CCSp2',name:'Change Camel Lv2',   bv:2.80,type:'spin'},
+  {id:'CCSp3',name:'Change Camel Lv3',   bv:3.40,type:'spin'},
+  {id:'CCSp4',name:'Change Camel Lv4',   bv:3.80,type:'spin'},
+  {id:'CSSpB',name:'Change Sit Base',    bv:1.90,type:'spin'},
+  {id:'CSSp1',name:'Change Sit Lv1',     bv:2.30,type:'spin'},
+  {id:'CSSp2',name:'Change Sit Lv2',     bv:2.80,type:'spin'},
+  {id:'CSSp3',name:'Change Sit Lv3',     bv:3.10,type:'spin'},
+  {id:'CSSp4',name:'Change Sit Lv4',     bv:3.60,type:'spin'},
+  {id:'CoSpB',name:'Combo Spin Base',    bv:1.80,type:'spin'},
+  {id:'CoSp1',name:'Combo Spin Lv1',     bv:2.00,type:'spin'},
+  {id:'CoSp2',name:'Combo Spin Lv2',     bv:2.40,type:'spin'},
+  {id:'CoSp3',name:'Combo Spin Lv3',     bv:3.00,type:'spin'},
+  {id:'CoSp4',name:'Combo Spin Lv4',     bv:3.60,type:'spin'},
+  {id:'CCoSpB',name:'Combo+CF Base',     bv:2.00,type:'spin'},
+  {id:'CCoSp1',name:'Combo+CF Lv1',      bv:2.40,type:'spin'},
+  {id:'CCoSp2',name:'Combo+CF Lv2',      bv:3.00,type:'spin'},
+  {id:'CCoSp3',name:'Combo+CF Lv3',      bv:3.60,type:'spin'},
+  {id:'CCoSp4',name:'Combo+CF Lv4',      bv:4.20,type:'spin'},
+  {id:'FCCoSpB',name:'Flying Combo+CF Base',bv:2.00,type:'spin'},
+  {id:'FCCoSp1',name:'Flying Combo+CF Lv1', bv:2.40,type:'spin'},
+  {id:'FCCoSp2',name:'Flying Combo+CF Lv2', bv:3.00,type:'spin'},
+  {id:'FCCoSp3',name:'Flying Combo+CF Lv3', bv:3.60,type:'spin'},
+  {id:'FCCoSp4',name:'Flying Combo+CF Lv4', bv:4.20,type:'spin'},
+];
+
+const STEPS = [
+  {id:'StSqB',name:'Step Sequence Base',bv:1.60,type:'step'},
+  {id:'StSq1',name:'Step Sequence Lv1', bv:1.90,type:'step'},
+  {id:'StSq2',name:'Step Sequence Lv2', bv:2.70,type:'step'},
+  {id:'StSq3',name:'Step Sequence Lv3', bv:3.50,type:'step'},
+  {id:'StSq4',name:'Step Sequence Lv4', bv:4.10,type:'step'},
+  {id:'ChSq1',name:'Choreo Step Seq',   bv:3.50,type:'step'},
+  {id:'ChSp1',name:'Choreo Spin',       bv:3.50,type:'step'},
+];
+
+const PCS_FACTORS = {
+  recreational:{SP:{men:0.50,women:0.50},FS:{men:0.50,women:0.50}},
+  adult:       {SP:{men:0.60,women:0.60},FS:{men:0.60,women:0.60}},
+  novice:      {SP:{men:0.80,women:0.70},FS:{men:1.00,women:0.80}},
+  junior:      {SP:{men:1.00,women:0.80},FS:{men:1.60,women:1.30}},
+  senior:      {SP:{men:1.67,women:1.33},FS:{men:3.33,women:2.67}},
+};
+
+const PCS_COMPONENTS = [
+  {id:'sk',name:'Skating Skills'},{id:'tr',name:'Transitions'},
+  {id:'pe',name:'Performance'},{id:'co',name:'Composition'},{id:'in',name:'Interpretation'},
+];
+
+const DEDUCTIONS = [
+  {id:'fall',name:'Fall',value:1.00},{id:'timeViol',name:'Time Violation',value:1.00},
+  {id:'costume',name:'Costume/Music',value:1.00},{id:'illegal',name:'Illegal Element',value:2.00},
+  {id:'lateStart',name:'Late Start',value:0.50},
+];
+
+// ─── STATE ───
+let state = {
+  category:'recreational', programType:'SP', gender:'men',
+  filter:'all', search:'', program:[],
+  pcs:{sk:0,tr:0,pe:0,co:0,in:0}, deductions:{}, selectedGOE:{},
+};
+
+// Combo builder state
+let combo = { slots:[null,null,null], goe:'0', secondHalf:false };
+let modalSlot = null; // which slot we're picking for
+
+// ─── SCORING HELPERS ───
+function goeVal(bv, goeStr) { return parseFloat((bv * parseInt(goeStr) * 0.10).toFixed(2)); }
+
+// Get list of jump IDs already in program (for repeat detection)
+function getJumpCounts() {
+  const counts = {};
+  state.program.forEach(item => {
+    if (item.isCombo) {
+      item.comboJumps.forEach(j => { if(j && !j.isEuler) counts[j.id] = (counts[j.id]||0)+1; });
+    } else if (item.element && item.element.type === 'jump') {
+      counts[item.element.id] = (counts[item.element.id]||0)+1;
+    }
+  });
+  return counts;
+}
+
+// Score a single element (non-combo)
+function elementScore(item) {
+  let bv = item.element.bv;
+  if (item.secondHalf) bv = bv * 1.1;
+  const goe = goeVal(bv, item.goe);
+  return Math.max(0, parseFloat((bv + goe).toFixed(2)));
+}
+
+// Score a combo
+function comboScore(item) {
+  // BV = sum of all jump BVs (Euler = 0)
+  const jumpCounts = {};
+  let totalBV = 0;
+  let hardestBV = 0;
+  item.comboJumps.forEach(j => {
+    if (!j) return;
+    let jbv = j.bv;
+    // Repeat penalty: if this jump ID already appeared in program before this combo → 80%
+    // (simplified: we track within combo itself for demo)
+    totalBV += jbv;
+    if (!j.isEuler && jbv > hardestBV) hardestBV = jbv;
+  });
+  if (item.secondHalf) totalBV = totalBV * 1.1;
+  // GOE from hardest jump BV (before second half)
+  const hardestBVforGOE = item.secondHalf ? hardestBV * 1.1 : hardestBV;
+  const goe = goeVal(hardestBVforGOE, item.goe);
+  return Math.max(0, parseFloat((totalBV + goe).toFixed(2)));
+}
+
+function calcTES() {
+  return parseFloat(state.program.reduce((s,item) => {
+    return s + (item.isCombo ? comboScore(item) : elementScore(item));
+  }, 0).toFixed(2));
+}
+function calcPCS() {
+  const f = PCS_FACTORS[state.category]?.[state.programType]?.[state.gender] || 1.0;
+  return parseFloat((Object.values(state.pcs).reduce((s,v)=>s+v,0)*f).toFixed(2));
+}
+function calcDED() { return DEDUCTIONS.reduce((s,d)=>s+(state.deductions[d.id]||0)*d.value,0); }
+
+// ─── COMBO BUILDER ───
+function comboLabel() {
+  return combo.slots.filter(Boolean).map(j=>j.id).join('+') || '—';
+}
+
+function getHardestInCombo() {
+  let best = null;
+  combo.slots.forEach(j => {
+    if (j && !j.isEuler && (!best || j.bv > best.bv)) best = j;
+  });
+  return best;
+}
+
+function comboBV() {
+  let total = combo.slots.reduce((s,j) => s + (j ? j.bv : 0), 0);
+  if (combo.secondHalf) total = total * 1.1;
+  return parseFloat(total.toFixed(2));
+}
+
+function comboGOEVal() {
+  const hardest = getHardestInCombo();
+  if (!hardest) return 0;
+  let hbv = hardest.bv;
+  if (combo.secondHalf) hbv = hbv * 1.1;
+  return goeVal(hbv, combo.goe);
+}
+
+function comboTotal() {
+  return Math.max(0, parseFloat((comboBV() + comboGOEVal()).toFixed(2)));
+}
+
+function renderComboSlots() {
+  const container = document.getElementById('comboSlots');
+  let html = '';
+  for (let i = 0; i < 3; i++) {
+    const j = combo.slots[i];
+    if (i > 0) html += `<div class="combo-plus">+</div>`;
+    if (j) {
+      html += `<div class="combo-slot filled" onclick="openModal(${i})">
+        <div class="combo-slot-name">${j.id}</div>
+        <div class="combo-slot-bv">${j.isEuler ? 'Eu 0.00' : j.bv.toFixed(2)}</div>
+        <div class="remove-x" onclick="removeComboSlot(event,${i})">✕ remove</div>
+      </div>`;
+    } else {
+      // Only show slot if previous is filled or it's slot 0
+      const enabled = i === 0 || combo.slots[i-1] !== null;
+      html += `<div class="combo-slot ${enabled?'':'disabled-slot'}" onclick="${enabled?'openModal('+i+')':''}">
+        <div class="combo-slot-empty">${enabled ? 'Tap to add' : '—'}</div>
+      </div>`;
+    }
+  }
+  container.innerHTML = html;
+}
+
+function renderComboGOE() {
+  const goeOptions = ['-5','-4','-3','-2','-1','0','+1','+2','+3','+4','+5'];
+  const container = document.querySelector('.combo-goe-row .goe-buttons');
+  if (!container) return;
+  container.innerHTML = goeOptions.map(g => {
+    const n=parseInt(g);
+    const cls=n<0?'neg':(n>0?'pos':'zero');
+    const sel=combo.goe===g?'selected':'';
+    return `<button class="goe-btn ${cls} ${sel}" onclick="setComboGOE('${g}')">${g}</button>`;
+  }).join('');
+}
+
+function renderComboPreview() {
+  combo.secondHalf = document.getElementById('comboSH').checked;
+  const filled = combo.slots.filter(Boolean);
+  const info = document.getElementById('comboInfo');
+  const btn = document.getElementById('btnAddCombo');
+
+  if (!filled.length) {
+    info.innerHTML = 'Select a jump to start building your combo';
+    btn.disabled = true;
+    return;
+  }
+
+  const hardest = getHardestInCombo();
+  const bv = comboBV();
+  const goe = comboGOEVal();
+  const total = comboTotal();
+  const shNote = combo.secondHalf ? ' <span style="color:var(--accent);">×1.1 (2nd half)</span>' : '';
+
+  let jumpsHtml = combo.slots.filter(Boolean).map(j=>
+    `<b style="color:var(--gold);">${j.id}</b> (${j.bv.toFixed(2)})`
+  ).join(' + ');
+
+  info.innerHTML = `
+    <div>${jumpsHtml}${shNote}</div>
+    <div style="margin-top:4px;">Total BV: <b style="color:#fff;">${bv.toFixed(2)}</b>
+      &nbsp;|&nbsp; GOE from <b style="color:var(--gold);">${hardest?hardest.id:'—'}</b>: 
+      <span style="color:${parseInt(combo.goe)>=0?'var(--positive)':'var(--negative)'};">${goe>=0?'+':''}${goe.toFixed(2)}</span>
+    </div>
+    <div style="margin-top:4px;font-size:14px;">Score: <span style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold);">${total.toFixed(2)}</span></div>
+  `;
+  btn.disabled = filled.length < 2;
+}
+
+function setComboGOE(g) {
+  combo.goe = g;
+  renderComboGOE();
+  renderComboPreview();
+}
+
+function removeComboSlot(e, idx) {
+  e.stopPropagation();
+  // Clear this and all subsequent slots
+  for (let i = idx; i < 3; i++) combo.slots[i] = null;
+  renderComboSlots();
+  renderComboPreview();
+}
+
+function clearCombo() {
+  combo = {slots:[null,null,null], goe:'0', secondHalf:false};
+  document.getElementById('comboSH').checked = false;
+  renderComboSlots();
+  renderComboGOE();
+  renderComboPreview();
+}
+
+function addComboToProgram() {
+  const filled = combo.slots.filter(Boolean);
+  if (filled.length < 2) return;
+  const label = combo.slots.filter(Boolean).map(j=>j.id).join('+');
+  state.program.push({
+    isCombo: true,
+    comboJumps: [...combo.slots],
+    goe: combo.goe,
+    secondHalf: combo.secondHalf,
+    label,
+  });
+  showToast(`${label} → ${comboTotal().toFixed(2)} pts`);
+  clearCombo();
+  renderAll();
+}
+
+// ─── MODAL ───
+function openModal(slotIdx) {
+  modalSlot = slotIdx;
+  const modal = document.getElementById('modalOverlay');
+  const title = document.getElementById('modalTitle');
+  const sub = document.getElementById('modalSub');
+  const body = document.getElementById('modalBody');
+  const searchEl = document.getElementById('modalSearch');
+
+  modal.classList.remove('hidden');
+  searchEl.value = '';
+
+  if (slotIdx === 0) {
+    title.textContent = '1st Jump';
+    sub.textContent = 'Select the first jump in the combo';
+  } else if (slotIdx === 1) {
+    title.textContent = '2nd Jump';
+    sub.textContent = 'Select 2nd jump (or Euler for a 3-jump combo)';
+  } else if (slotIdx === 2) {
+    title.textContent = '3rd Jump';
+    sub.textContent = 'Only Toe Loop or Loop allowed in 3rd position';
+  }
+
+  body.innerHTML = renderModalJumps(slotIdx, '');
+  // auto-focus search
+  setTimeout(() => searchEl.focus(), 100);
+}
+
+function filterModal() {
+  const q = document.getElementById('modalSearch').value;
+  document.getElementById('modalBody').innerHTML = renderModalJumps(modalSlot, q);
+}
+
+function renderModalJumps(slotIdx, q='') {
+  const query = (q||'').toLowerCase().trim();
+  let html = '';
+
+  // Euler option for slot 1
+  if (slotIdx === 1 && combo.slots[0]) {
+    const eulerMatch = !query || 'euler'.includes(query) || 'eu'.includes(query);
+    if (eulerMatch) {
+      html += `<div class="modal-jump-group">
+        <div class="modal-group-title">⭐ Euler (for 3-jump combo)</div>
+        <button class="modal-jump-btn modal-euler" onclick="selectModalJump('Eu')">
+          <span>Euler (1Eu)</span>
+          <span class="modal-bv" style="color:var(--silver);">BV 0.00</span>
+        </button>
+      </div>`;
+    }
+  }
+
+  const groups = ['single','double','triple','quad','quint'];
+  const groupNames = {single:'Single Jumps',double:'Double Jumps',triple:'Triple Jumps',quad:'Quad Jumps',quint:'Quint Jumps'};
+  const lvlColors = {single:'rgba(255,255,255,0.15)',double:'rgba(255,255,255,0.3)',
+    triple:'var(--accent)',quad:'var(--gold)',quint:'#ff6b35'};
+
+  let anyResult = false;
+  groups.forEach(lvl => {
+    let jumpsInLvl = JUMPS.filter(j => j.level === lvl);
+    if (slotIdx === 2) jumpsInLvl = jumpsInLvl.filter(j => j.canThird);
+
+    // Filter by search query
+    if (query) {
+      jumpsInLvl = jumpsInLvl.filter(j =>
+        j.name.toLowerCase().includes(query) ||
+        j.id.toLowerCase().includes(query) ||
+        lvl.includes(query)
+      );
+    }
+
+    if (!jumpsInLvl.length) return;
+    anyResult = true;
+
+    html += `<div class="modal-jump-group">
+      <div class="modal-group-title">${groupNames[lvl]}</div>`;
+    jumpsInLvl.forEach(j => {
+      html += `<button class="modal-jump-btn" onclick="selectModalJump('${j.id}')"
+        style="border-left:3px solid ${lvlColors[lvl]||'var(--border)'};">
+        <span>${j.name} <span style="opacity:0.45;font-size:11px;">${j.id}</span></span>
+        <span class="modal-bv">${j.bv.toFixed(2)}</span>
+      </button>`;
+    });
+    html += '</div>';
+  });
+
+  if (!anyResult && !html) {
+    html = `<div class="empty"><div class="empty-icon">🔍</div><div>No jump found for "${q}"</div></div>`;
+  }
+
+  return html;
+}
+
+function selectModalJump(jumpId) {
+  const j = JUMPS.find(x=>x.id===jumpId);
+  if (!j) return;
+  combo.slots[modalSlot] = j;
+  // If euler placed at slot 1, slot 2 must be Toeloop or Loop — handled by modal filter
+  closeModal();
+  renderComboSlots();
+  renderComboPreview();
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.add('hidden');
+  document.getElementById('modalSearch').value = '';
+}
+function closeModalOutside(e) { if(e.target.id==='modalOverlay') closeModal(); }
+
+// ─── ELEMENTS PAGE ───
+function allElements() {
+  return [
+    ...JUMPS.map(j=>({...j,type:'jump'})),
+    ...SPINS,
+    ...STEPS,
+  ];
+}
+
+function filteredElements() {
+  let list = allElements();
+  if (state.filter !== 'all') list = list.filter(e=>e.type===state.filter);
+  if (state.search) {
+    const q = state.search.toLowerCase();
+    list = list.filter(e=>e.name.toLowerCase().includes(q)||e.id.toLowerCase().includes(q));
+  }
+  return list;
+}
+
+function renderElements() {
+  const container = document.getElementById('elementsList');
+  const list = filteredElements();
+  if (!list.length) {
+    container.innerHTML = '<div class="empty"><div class="empty-icon">🔍</div><div>No elements found</div></div>';
+    return;
+  }
+  let html = '';
+  let lastType = '';
+  const goeOpts = ['-5','-4','-3','-2','-1','0','+1','+2','+3','+4','+5'];
+
+  list.forEach(function(el) {
+    if (el.type !== lastType) {
+      if (lastType) html += '</div>';
+      const titles = {jump:'⛸ Jumps', spin:'🌀 Spins', step:'👣 Steps & Choreography'};
+      html += '<div class="section"><div class="section-title">' + (titles[el.type] || el.type) + '</div>';
+      lastType = el.type;
+    }
+
+    const goe = state.selectedGOE[el.id] || '0';
+    const cardClass = el.isEuler ? 'euler-card' : (el.level || '');
+
+    // Build GOE buttons string
+    let goeBtns = '';
+    if (!el.isEuler) {
+      goeOpts.forEach(function(g) {
+        const n = parseInt(g);
+        const cls = n < 0 ? 'neg' : (n > 0 ? 'pos' : 'zero');
+        const sel = goe === g ? 'selected' : '';
+        goeBtns += '<button class="goe-btn ' + cls + ' ' + sel + '" onclick="setGOE(\'' + el.id + '\',\'' + g + '\')">' + g + '</button>';
+      });
+    }
+
+    const goeRow = el.isEuler ? '' :
+      '<div class="goe-row"><span class="goe-label">GOE</span><div class="goe-buttons">' + goeBtns + '</div></div>';
+
+    const eulerNote = el.isEuler ?
+      '<div style="font-size:11px;color:var(--silver);opacity:0.6;padding:2px 0;">Connecting jump · No GOE · BV = 0.00 · Used in combo only</div>' : '';
+
+    const shToggle = el.isEuler ? '' :
+      '<label class="sh-toggle" style="margin:0;flex:0 0 auto;padding:5px 9px;font-size:11px;" title="Second half +10%">' +
+      '<input type="checkbox" id="sh_' + el.id + '" style="width:13px;height:13px;">' +
+      '<span style="font-size:10px;color:var(--silver);">2nd half</span></label>';
+
+    html += '<div class="element-card ' + cardClass + '">' +
+      '<div class="element-top">' +
+        '<div class="element-name">' + el.name + ' <span style="font-size:10px;opacity:0.45;">' + el.id + '</span></div>' +
+        '<div class="element-bv">' + el.bv.toFixed(2) + '</div>' +
+      '</div>' +
+      goeRow +
+      eulerNote +
+      '<div class="elem-actions">' +
+        shToggle +
+        '<button class="btn-add" onclick="addSingleElement(\'' + el.id + '\')">+ Add</button>' +
+      '</div>' +
+    '</div>';
+  });
+
+  if (lastType) html += '</div>';
+  container.innerHTML = html;
+}
+
+function renderProgram() {
+  const c=document.getElementById('programList');
+  if(!state.program.length){
+    c.innerHTML=`<div class="empty"><div class="empty-icon">📋</div><div>No elements added yet.<br><span style="font-size:11px;opacity:0.6;">Add elements from the Elements or Combo tab.</span></div></div>`;
+    return;
+  }
+  let html='<div class="program-list" id="sortableList">';
+  state.program.forEach((item,idx)=>{
+    const score = item.isCombo ? comboScore(item) : elementScore(item);
+    let name, detail, badges='';
+    if(item.isCombo){
+      name=item.label;
+      const hardest=getHardestInComboItem(item);
+      const bv=item.comboJumps.reduce((s,j)=>s+(j?j.bv:0),0);
+      detail=`BV ${bv.toFixed(2)} | GOE from ${hardest?hardest.id:'—'} | ${parseInt(item.goe)>=0?'+':''}${item.goe}`;
+      badges+=`<span class="badge badge-combo">COMBO</span>`;
+      if(item.secondHalf) badges+=`<span class="badge badge-sh">×1.1</span>`;
+    } else {
+      name=item.element.id;
+      detail=`BV ${item.element.bv.toFixed(2)} | GOE ${parseInt(item.goe)>=0?'+':''}${item.goe}`;
+      if(item.secondHalf) badges+=`<span class="badge badge-sh">×1.1</span>`;
+    }
+    const canUp = idx > 0;
+    const canDown = idx < state.program.length - 1;
+    html+=`<div class="program-item" draggable="true" data-idx="${idx}"
+      ondragstart="dragStart(event,${idx})" ondragover="dragOver(event,${idx})"
+      ondragleave="dragLeave(event)" ondrop="dragDrop(event,${idx})" ondragend="dragEnd()">
+      <div class="drag-handle" title="Drag to reorder">⠿</div>
+      <div class="prog-num">${idx+1}</div>
+      <div class="prog-info">
+        <div class="prog-name">${name}</div>
+        <div class="prog-detail">${detail}</div>
+        ${badges?`<div class="prog-badges">${badges}</div>`:''}
+      </div>
+      <div class="prog-score">${score.toFixed(2)}</div>
+      <div class="prog-actions">
+        <button class="prog-move" onclick="moveElement(${idx},-1)" ${canUp?'':'disabled'} title="Move up">▲</button>
+        <button class="prog-move" onclick="moveElement(${idx},1)" ${canDown?'':'disabled'} title="Move down">▼</button>
+        <button class="prog-remove" onclick="removeElement(${idx})" title="Remove">✕</button>
+      </div>
+    </div>`;
+  });
+  c.innerHTML=html+'</div>';
+}
+
+function getHardestInComboItem(item) {
+  let best=null;
+  item.comboJumps.forEach(j=>{
+    if(j&&!j.isEuler&&(!best||j.bv>best.bv)) best=j;
+  });
+  return best;
+}
+
+function renderPCS() {
+  const factor=PCS_FACTORS[state.category]?.[state.programType]?.[state.gender]||1.0;
+  let html='';
+  PCS_COMPONENTS.forEach(c=>{
+    const val=state.pcs[c.id]||0;
+    html+=`<div class="pcs-item">
+      <div class="pcs-name">${c.name}</div>
+      <input type="range" class="pcs-slider" min="0" max="10" step="0.25" value="${val}" oninput="setPCS('${c.id}',this.value)">
+      <div class="pcs-val">${parseFloat(val).toFixed(2)}</div>
+      <div class="pcs-factor">×${factor} = ${(val*factor).toFixed(2)}</div>
+    </div>`;
+  });
+  document.getElementById('pcsGrid').innerHTML=html;
+  let dhtml='';
+  DEDUCTIONS.forEach(d=>{
+    const cnt=state.deductions[d.id]||0;
+    dhtml+=`<div class="ded-row">
+      <span class="ded-name">${d.name} <span style="font-size:11px;color:var(--negative);">-${d.value.toFixed(2)}</span></span>
+      <div class="ded-counter">
+        <button class="ded-btn" onclick="changeDed('${d.id}',-1)">−</button>
+        <div class="ded-count">${cnt}</div>
+        <button class="ded-btn" onclick="changeDed('${d.id}',1)">+</button>
+      </div>
+    </div>`;
+  });
+  document.getElementById('deductionsList').innerHTML=dhtml;
+}
+
+function renderTotal() {
+  const tes=calcTES(),pcs=calcPCS(),ded=calcDED();
+  const total=Math.max(0,tes+pcs-ded);
+  document.getElementById('totalTES').textContent=tes.toFixed(2);
+  document.getElementById('totalPCS').textContent=pcs.toFixed(2);
+  document.getElementById('totalDED').textContent=`-${ded.toFixed(2)}`;
+  document.getElementById('grandTotal').textContent=total.toFixed(2);
+
+  const bd=document.getElementById('breakdownList');
+  if(!state.program.length){bd.innerHTML=`<div class="empty"><div>No elements yet</div></div>`;return;}
+  let html='';
+  state.program.forEach((item,idx)=>{
+    const score=item.isCombo?comboScore(item):elementScore(item);
+    let name=item.isCombo?item.label:item.element.id;
+    let bvStr=item.isCombo?item.comboJumps.reduce((s,j)=>s+(j?j.bv:0),0).toFixed(2):item.element.bv.toFixed(2);
+    const n=parseInt(item.goe);
+    const gc=n>0?'var(--positive)':(n<0?'var(--negative)':'var(--silver)');
+    html+=`<div class="program-item">
+      <div class="prog-num">${idx+1}</div>
+      <div class="prog-info">
+        <div class="prog-name">${name}</div>
+        <div class="prog-detail">BV ${bvStr} <span style="color:${gc};">GOE ${n>=0?'+':''}${item.goe}</span>${item.secondHalf?'<span style="color:var(--accent);"> ×1.1</span>':''}</div>
+      </div>
+      <div class="prog-score">${score.toFixed(2)}</div>
+    </div>`;
+  });
+  bd.innerHTML=html;
+}
+
+function renderAll(){renderElements();renderProgram();renderPCS();renderTotal();}
+
+// ─── ACTIONS ───
+function setCategory(cat,btn){
+  state.category=cat;
+  document.querySelectorAll('#catTabs .tab').forEach(t=>t.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderAll();
+}
+function setProgramType(type){
+  state.programType=type;
+  document.getElementById('spBtn').classList.toggle('active',type==='SP');
+  document.getElementById('fsBtn').classList.toggle('active',type==='FS');
+  renderPCS();renderTotal();
+}
+function setGender(g,btn){
+  state.gender=g;
+  document.querySelectorAll('.gender-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderPCS();renderTotal();
+}
+function showPage(page,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  if(page==='total') renderTotal();
+  if(page==='program') renderProgram();
+  if(page==='pcs') renderPCS();
+  if(page==='combo'){renderComboSlots();renderComboGOE();renderComboPreview();}
+}
+function setGOE(elId,goe){state.selectedGOE[elId]=goe;renderElements();}
+function setFilter(f,btn){
+  state.filter=f;
+  document.querySelectorAll('.filter-chip').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderElements();
+}
+function filterElements(){state.search=document.getElementById('searchInput').value;renderElements();}
+
+function addSingleElement(elId){
+  const allEl=allElements();
+  const el=allEl.find(e=>e.id===elId);
+  if(!el) return;
+  const goe=state.selectedGOE[elId]||'0';
+  const sh=document.getElementById('sh_'+elId)?.checked||false;
+  state.program.push({element:el,goe,secondHalf:sh,isCombo:false});
+  let bv=el.bv; if(sh) bv=bv*1.1;
+  const score=Math.max(0,parseFloat((bv+goeVal(bv,goe)).toFixed(2)));
+  showToast(`${el.id} → ${score.toFixed(2)} pts`);
+  renderAll();
+}
+
+function removeElement(idx){state.program.splice(idx,1);renderProgram();renderTotal();}
+function resetProgram(){if(confirm('Clear all elements?')){state.program=[];renderAll();}}
+function setPCS(id,val){state.pcs[id]=parseFloat(val);renderPCS();renderTotal();}
+function changeDed(id,delta){state.deductions[id]=Math.max(0,(state.deductions[id]||0)+delta);renderPCS();renderTotal();}
+
+function showToast(msg){
+  let t=document.getElementById('toast');
+  if(!t){
+    t=document.createElement('div');t.id='toast';
+    t.style.cssText=`position:fixed;bottom:86px;left:50%;transform:translateX(-50%);
+      background:var(--accent);color:#fff;padding:8px 16px;border-radius:18px;
+      font-weight:600;font-size:12px;z-index:999;transition:opacity 0.3s;white-space:nowrap;`;
+    document.body.appendChild(t);
+  }
+  t.textContent=msg;t.style.opacity='1';
+  clearTimeout(t._t);t._t=setTimeout(()=>t.style.opacity='0',1800);
+}
+
+// ─── DRAG & DROP ───
+let dragSrcIdx = null;
+
+function dragStart(e, idx) {
+  dragSrcIdx = idx;
+  e.dataTransfer.effectAllowed = 'move';
+  setTimeout(() => {
+    const el = document.querySelector(`[data-idx="${idx}"]`);
+    if (el) el.classList.add('dragging');
+  }, 0);
+}
+function dragOver(e, idx) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  document.querySelectorAll('.program-item').forEach(el => el.classList.remove('drag-over'));
+  const el = document.querySelector(`[data-idx="${idx}"]`);
+  if (el && idx !== dragSrcIdx) el.classList.add('drag-over');
+}
+function dragLeave(e) {
+  e.currentTarget.classList.remove('drag-over');
+}
+function dragDrop(e, idx) {
+  e.preventDefault();
+  if (dragSrcIdx === null || dragSrcIdx === idx) return;
+  const moved = state.program.splice(dragSrcIdx, 1)[0];
+  state.program.splice(idx, 0, moved);
+  dragSrcIdx = null;
+  renderProgram(); renderTotal();
+}
+function dragEnd() {
+  dragSrcIdx = null;
+  document.querySelectorAll('.program-item').forEach(el => {
+    el.classList.remove('dragging', 'drag-over');
+  });
+}
+
+// ─── MOVE UP / DOWN ───
+function moveElement(idx, dir) {
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= state.program.length) return;
+  const tmp = state.program[idx];
+  state.program[idx] = state.program[newIdx];
+  state.program[newIdx] = tmp;
+  renderProgram(); renderTotal();
+}
+
+// ─── SAVE / LOAD (localStorage) ───
+const SAVE_SLOTS = 5;
+const SAVE_KEY = 'isuCalc_save_';
+
+function serializeProgram() {
+  return JSON.stringify({
+    program: state.program,
+    category: state.category,
+    programType: state.programType,
+    gender: state.gender,
+    pcs: state.pcs,
+    deductions: state.deductions,
+    savedAt: new Date().toLocaleString(),
+    elementCount: state.program.length,
+    tes: calcTES(),
+  });
+}
+
+function openSavePanel() {
+  const sp = document.getElementById('savePanel');
+  const lp = document.getElementById('loadPanel');
+  lp.style.display = 'none';
+  sp.style.display = sp.style.display === 'none' ? 'block' : 'none';
+  if (sp.style.display === 'block') renderSaveSlots('save');
+}
+
+function openLoadPanel() {
+  const sp = document.getElementById('savePanel');
+  const lp = document.getElementById('loadPanel');
+  sp.style.display = 'none';
+  lp.style.display = lp.style.display === 'none' ? 'block' : 'none';
+  if (lp.style.display === 'block') renderSaveSlots('load');
+}
+
+function renderSaveSlots(mode) {
+  const containerId = mode === 'save' ? 'saveSlotsContainer' : 'loadSlotsContainer';
+  const container = document.getElementById(containerId);
+  let html = '';
+  for (let i = 1; i <= SAVE_SLOTS; i++) {
+    const raw = localStorage.getItem(SAVE_KEY + i);
+    const saved = raw ? JSON.parse(raw) : null;
+    if (saved) {
+      html += `<div class="save-slot" onclick="${mode}ToSlot(${i})">
+        <div class="save-slot-num">${i}</div>
+        <div class="save-slot-info">
+          <div class="save-slot-name">${saved.category?.toUpperCase()} · ${saved.programType} · ${saved.elementCount} elements</div>
+          <div class="save-slot-meta">TES ${saved.tes?.toFixed(2)} · Saved ${saved.savedAt}</div>
+        </div>
+        <button class="save-slot-del" onclick="deleteSlot(event,${i})" title="Delete">🗑</button>
+      </div>`;
+    } else {
+      html += `<div class="save-slot" onclick="${mode}ToSlot(${i})">
+        <div class="save-slot-num">${i}</div>
+        <div class="save-slot-empty">Empty slot</div>
+      </div>`;
+    }
+  }
+  container.innerHTML = html;
+}
+
+function saveToSlot(slot) {
+  if (!state.program.length) { showToast('No elements to save!'); return; }
+  localStorage.setItem(SAVE_KEY + slot, serializeProgram());
+  showToast(`✅ Saved to slot ${slot}`);
+  document.getElementById('savePanel').style.display = 'none';
+}
+
+function loadToSlot(slot) {
+  const raw = localStorage.getItem(SAVE_KEY + slot);
+  if (!raw) { showToast('Slot is empty'); return; }
+  const saved = JSON.parse(raw);
+  state.program = saved.program || [];
+  state.category = saved.category || 'recreational';
+  state.programType = saved.programType || 'SP';
+  state.gender = saved.gender || 'men';
+  state.pcs = saved.pcs || {sk:7,tr:7,pe:7,co:7,in:7};
+  state.deductions = saved.deductions || {};
+  // Sync category tabs
+  document.querySelectorAll('#catTabs .tab').forEach(t => t.classList.remove('active'));
+  const tabs = document.querySelectorAll('#catTabs .tab');
+  const cats = ['recreational','adult','novice','junior','senior'];
+  const catIdx = cats.indexOf(state.category);
+  if (tabs[catIdx]) tabs[catIdx].classList.add('active');
+  document.getElementById('spBtn').classList.toggle('active', state.programType === 'SP');
+  document.getElementById('fsBtn').classList.toggle('active', state.programType === 'FS');
+  document.getElementById('loadPanel').style.display = 'none';
+  renderAll();
+  showToast(`📂 Loaded slot ${slot} — ${state.program.length} elements`);
+}
+
+function deleteSlot(e, slot) {
+  e.stopPropagation();
+  if (!confirm(`Delete save slot ${slot}?`)) return;
+  localStorage.removeItem(SAVE_KEY + slot);
+  // re-render whichever panel is open
+  if (document.getElementById('savePanel').style.display !== 'none') renderSaveSlots('save');
+  if (document.getElementById('loadPanel').style.display !== 'none') renderSaveSlots('load');
+  showToast(`Slot ${slot} deleted`);
+}
+
+// ─── SHARE VIA URL ───
+function encodeProgram() {
+  const data = {
+    p: state.program,
+    c: state.category,
+    pt: state.programType,
+    g: state.gender,
+    pcs: state.pcs,
+    ded: state.deductions,
+  };
+  return btoa(encodeURIComponent(JSON.stringify(data)));
+}
+
+function decodeProgram(encoded) {
+  try {
+    return JSON.parse(decodeURIComponent(atob(encoded.trim())));
+  } catch(e) {
+    return null;
+  }
+}
+
+function buildShareUrl() {
+  const base = window.location.href.split('?')[0];
+  return base + '?program=' + encodeProgram();
+}
+
+function openShareModal() {
+  if (!state.program.length) {
+    showToast('Add elements first!');
+    return;
+  }
+  const code = encodeProgram();
+  const url = buildShareUrl();
+  document.getElementById('shareUrlInput').value = url;
+  document.getElementById('exportCodeBox').textContent = code;
+  document.getElementById('importCodeInput').value = '';
+  document.getElementById('shareModal').classList.add('open');
+}
+
+function closeShareModal() {
+  document.getElementById('shareModal').classList.remove('open');
+}
+
+function closeShareOutside(e) {
+  if (e.target.id === 'shareModal') closeShareModal();
+}
+
+function copyShareUrl() {
+  const val = document.getElementById('shareUrlInput').value;
+  navigator.clipboard.writeText(val).then(() => {
+    showToast('✅ Link copied!');
+  }).catch(() => {
+    document.getElementById('shareUrlInput').select();
+    document.execCommand('copy');
+    showToast('✅ Link copied!');
+  });
+}
+
+function copyExportCode() {
+  const val = document.getElementById('exportCodeBox').textContent;
+  navigator.clipboard.writeText(val).then(() => {
+    showToast('✅ Share code copied! Send it via WhatsApp/email.');
+  }).catch(() => {
+    showToast('✅ Code copied!');
+  });
+}
+
+function importCode() {
+  const raw = document.getElementById('importCodeInput').value.trim();
+  if (!raw) { showToast('Paste a share code first!'); return; }
+  const data = decodeProgram(raw);
+  if (!data || !data.p) {
+    showToast('❌ Invalid code — please check and try again.');
+    return;
+  }
+  applyLoadedState(data);
+  closeShareModal();
+  showToast('✅ Program loaded successfully!');
+}
+
+function applyLoadedState(data) {
+  state.program = data.p || [];
+  state.category = data.c || 'recreational';
+  state.programType = data.pt || 'SP';
+  state.gender = data.g || 'men';
+  state.pcs = data.pcs || {sk:0,tr:0,pe:0,co:0,in:0};
+  state.deductions = data.ded || {};
+
+  // Sync UI tabs
+  document.querySelectorAll('#catTabs .tab').forEach(t => t.classList.remove('active'));
+  const cats = ['recreational','adult','novice','junior','senior'];
+  const tabs = document.querySelectorAll('#catTabs .tab');
+  const idx = cats.indexOf(state.category);
+  if (tabs[idx]) tabs[idx].classList.add('active');
+  document.getElementById('spBtn').classList.toggle('active', state.programType === 'SP');
+  document.getElementById('fsBtn').classList.toggle('active', state.programType === 'FS');
+  renderAll();
+}
+
+function checkUrlForProgram() {
+  const params = new URLSearchParams(window.location.search);
+  const encoded = params.get('program');
+  if (!encoded) return;
+  const data = decodeProgram(encoded);
+  if (!data) return;
+  applyLoadedState(data);
+  showToast('📂 Program loaded from shared link!');
+}
+
+// ─── INIT ───
+checkUrlForProgram();
+renderAll();
+renderComboSlots();
+renderComboGOE();
+renderComboPreview();
+</script>
+</body>
+</html>
