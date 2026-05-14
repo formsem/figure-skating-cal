@@ -224,11 +224,23 @@
   .score-divider{height:1px;background:var(--border);margin:10px 0;}
   .total-label{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;color:var(--accent);}
   .total-val{font-family:'Bebas Neue',sans-serif;font-size:34px;color:var(--gold);line-height:1;}
+
+  /* PCS */
+  .pcs-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+  .pcs-item{background:var(--glass);border:1px solid var(--border);border-radius:11px;padding:10px;}
+  .pcs-name{font-size:10px;color:var(--silver);opacity:0.6;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;}
+  .pcs-slider{width:100%;accent-color:var(--accent);cursor:pointer;}
+  .pcs-val{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--accent);margin-top:2px;}
+  .pcs-factor{font-size:9px;color:var(--silver);opacity:0.4;margin-top:1px;}
   .ded-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
   .ded-name{font-size:12px;color: var(--silver);}
   .ded-counter{display:flex;align-items:center;gap:8px;}
   .ded-btn{width:26px;height:26px;border-radius:7px;border:1px solid var(--border);background:var(--glass);color:#fff;font-size:15px;cursor:pointer;}
   .ded-count{font-family:'Bebas Neue',sans-serif;font-size:19px;width:20px;text-align:center;color:var(--negative);}
+  .gender-row{display:flex;gap:7px;margin-bottom:10px;}
+  .gender-btn{flex:1;padding:7px;border-radius:9px;border:1px solid var(--border);
+    background:transparent;color:var(--silver);font-size:12px;font-weight:500;cursor:pointer;transition:all 0.2s;}
+  .gender-btn.active{background:rgba(0,180,216,0.14);border-color:var(--accent);color:var(--accent);}
 
   /* BOTTOM NAV */
   .bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);
@@ -579,7 +591,7 @@
     <div class="score-row"><span class="total-label">TOTAL ELEMENT SCORE</span><span class="total-val" id="totalTES">0.00</span></div>
   </div>
   <p style="margin:12px 16px 0;font-size:11px;color:rgba(205,214,244,0.5);line-height:1.6;padding:10px 12px;border:1px solid rgba(255,255,255,0.08);border-radius:10px;background:rgba(255,255,255,0.03);">
-    ⚠️ This calculator shows <b style="color:rgba(205,214,244,0.8);">Technical Element Score (TES)</b> only.
+    &#9888;&#65039; This calculator shows <b style="color:rgba(205,214,244,0.8);">Technical Element Score (TES)</b> only.
     Program Components Score (PCS) and deductions are not calculated.<br>
     For official total scores, add PCS and subtract deductions manually.
   </p>
@@ -618,6 +630,7 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
 <script>
 // ============================================================
 // ISU Communication No. 2786 — Season 2026/27
@@ -746,10 +759,25 @@ const STEPS = [
   {id:'ChSp1',name:'Choreo Spin',       bv:3.50,type:'step'},
 ];
 
+const PCS_FACTORS = {
+  senior: {SP:{men:1.67,women:1.33},FS:{men:3.33,women:2.67}},
+};
+
+const PCS_COMPONENTS = [
+  {id:'sk',name:'Skating Skills'},{id:'tr',name:'Transitions'},
+  {id:'pe',name:'Performance'},{id:'co',name:'Composition'},{id:'in',name:'Interpretation'},
+];
+
+const DEDUCTIONS = [
+  {id:'fall',name:'Fall',value:1.00},{id:'timeViol',name:'Time Violation',value:1.00},
+  {id:'costume',name:'Costume/Music',value:1.00},{id:'illegal',name:'Illegal Element',value:2.00},
+  {id:'lateStart',name:'Late Start',value:0.50},
+];
 
 // ─── STATE ───
 let state = {
-  filter:'all', search:'', program:[], selectedGOE:{},
+  filter:'all', search:'', program:[],
+  selectedGOE:{},
   programName: '',  // name of currently loaded program
 };
 
@@ -807,6 +835,7 @@ function calcTES() {
     return s + (item.isCombo ? comboScore(item) : elementScore(item));
   }, 0).toFixed(2));
 }
+
 
 // ─── COMBO BUILDER ───
 function comboLabel() {
@@ -1195,6 +1224,8 @@ function getHardestInComboItem(item) {
   return best;
 }
 
+
+
 function renderTotal() {
   let jumps=0, spins=0, steps=0;
   state.program.forEach(item=>{
@@ -1231,6 +1262,9 @@ function updateProgramNameDisplay() {
 function renderAll(){renderElements();renderProgram();renderTotal();}
 
 // ─── ACTIONS ───
+
+
+
 function showPage(page,btn){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
@@ -1264,6 +1298,7 @@ function addSingleElement(elId){
 
 function removeElement(idx){state.program.splice(idx,1);renderProgram();renderTotal();}
 function resetProgram(){if(confirm('Clear all elements?')){state.program=[];state.programName='';updateProgramNameDisplay();renderAll();}}
+
 
 function showToast(msg){
   let t=document.getElementById('toast');
@@ -1331,11 +1366,7 @@ const SAVE_KEY = 'isuCalc_save_';
 function serializeProgram() {
   return JSON.stringify({
     program: state.program,
-    category: state.category,
-    programType: state.programType,
-    gender: state.gender,
-    pcs: state.pcs,
-    deductions: state.deductions,
+    selectedGOE: state.selectedGOE,
     savedAt: new Date().toLocaleString(),
     elementCount: state.program.length,
     tes: calcTES(),
@@ -1443,7 +1474,7 @@ function saveToSlot(slot) {
   const saveData = {
     name:
       customName ||
-      `${state.category} ${state.programType} ${state.program.length} elements`,
+      `Program (${state.program.length} elements)`,
     data: serializeProgram()
   };
 
@@ -1472,17 +1503,8 @@ function loadToSlot(slot) {
 		: saved;
 
 	state.program = parsed.program || [];
-	state.category = parsed.category || 'recreational';
-	state.programType = parsed.programType || 'SP';
-	state.gender = parsed.gender || 'men';
-	state.pcs = parsed.pcs || {sk:7,tr:7,pe:7,co:7,in:7};
-	state.deductions = parsed.deductions || {};
+	state.selectedGOE = parsed.selectedGOE || {};
   
-  // Sync category tabs
-  document.querySelectorAll('#catTabs .tab').forEach(t => t.classList.remove('active'));
-  const tabs = document.querySelectorAll('#catTabs .tab');
-  document.getElementById('spBtn').classList.toggle('active', state.programType === 'SP');
-  document.getElementById('fsBtn').classList.toggle('active', state.programType === 'FS');
   state.programName = saved.name || '';
   updateProgramNameDisplay();
   document.getElementById('loadPanel').style.display = 'none';
@@ -1588,23 +1610,13 @@ function importCode() {
 }
 
 function applyLoadedState(data) {
-  state.program = data.p || [];
-  state.category = data.c || 'recreational';
-  state.programType = data.pt || 'SP';
-  state.gender = data.g || 'men';
-  state.pcs = data.pcs || {sk:0,tr:0,pe:0,co:0,in:0};
-  state.deductions = data.ded || {};
-  state.programName = data.n || '';
+  // Support both key formats:
+  // buildShareUrl (JSON.stringify state) → keys: program, programName
+  // encodeProgram (manual) → keys: p, n
+  state.program = data.p || data.program || [];
+  state.selectedGOE = data.selectedGOE || {};
+  state.programName = data.n || data.programName || '';
   updateProgramNameDisplay();
-
-  // Sync UI tabs
-  document.querySelectorAll('#catTabs .tab').forEach(t => t.classList.remove('active'));
-  const cats = ['recreational','adult','novice','junior','senior'];
-  const tabs = document.querySelectorAll('#catTabs .tab');
-  const idx = cats.indexOf(state.category);
-  if (tabs[idx]) tabs[idx].classList.add('active');
-  document.getElementById('spBtn').classList.toggle('active', state.programType === 'SP');
-  document.getElementById('fsBtn').classList.toggle('active', state.programType === 'FS');
   renderAll();
 }
 
@@ -1641,6 +1653,9 @@ function checkUrlForProgram() {
 
 // ─── INIT ───
 (function() {
+  // Check BEFORE loading: does the URL have query params (?p=...)?
+  const hasSharedLink = window.location.search.length > 0;
+
   const _urlLoaded = checkUrlForProgram();
   renderAll();
   renderComboSlots();
@@ -1655,16 +1670,17 @@ function checkUrlForProgram() {
     return null;
   }
 
-  if (_urlLoaded) {
+  // If URL has ?p=... parameter → land on Program page
+  // If plain URL (no params) → land on Elements page
+  if (hasSharedLink) {
     const btn = findNavBtn('Program');
     showPage('program', btn);
-    showToast('📂 Program loaded from shared link!');
+    if (_urlLoaded) showToast('📂 Program loaded from shared link!');
   } else {
     const btn = findNavBtn('Elements');
     showPage('elements', btn);
   }
 })();		   
 </script>
-<script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
 </body>
 </html>
