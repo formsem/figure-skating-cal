@@ -1616,7 +1616,10 @@ function decodeProgram(encoded) {
 
 function buildShareUrl() {
   const base = window.location.href.split('?')[0];
-  return base + '?program=' + encodeProgram();
+  const json = JSON.stringify(state);
+  const compressed =
+    LZString.compressToEncodedURIComponent(json);
+  return base + '?p=' + compressed;
 }
 
 function openShareModal() {
@@ -1698,13 +1701,34 @@ function applyLoadedState(data) {
 }
 
 function checkUrlForProgram() {
-  const params = new URLSearchParams(window.location.search);
-  const encoded = params.get('program');
-  if (!encoded) return false;
-  const data = decodeProgram(encoded);
-  if (!data) return false;
-  applyLoadedState(data);
-  return true;
+  const params =
+    new URLSearchParams(window.location.search);
+  // NEW compressed links
+  const compressed = params.get('p');
+  // OLD compatibility
+  const oldProgram = params.get('program');
+
+  try {
+    // NEW compressed format
+    if (compressed) {
+      const json =
+        LZString.decompressFromEncodedURIComponent(compressed);
+      if (!json) return false;
+      const data = JSON.parse(json);
+      applyLoadedState(data);
+      return true;
+    }
+    // OLD format compatibility
+    if (oldProgram) {
+      const data = decodeProgram(oldProgram);
+      if (!data) return false;
+      applyLoadedState(data);
+      return true;
+    }
+  } catch (e) {
+    console.error('Failed to load shared program', e);
+  }
+  return false;
 }
 
 // ─── INIT ───
@@ -1733,5 +1757,6 @@ function checkUrlForProgram() {
   }
 })();		   
 </script>
+<script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
 </body>
 </html>
