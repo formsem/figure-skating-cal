@@ -1680,8 +1680,11 @@ function checkUrlForProgram() {
 
 // ─── INIT ───
 (function() {
-  // Check BEFORE loading: does the URL have query params (?p=...)?
-  const hasSharedLink = window.location.search.length > 0;
+  // Check specifically for the ?p= parameter (shared program link).
+  // Ignore other URL params like utm_source, utm_medium, fbclid, etc.
+  // that are added by Instagram/social media and do NOT indicate a shared program.
+  const params = new URLSearchParams(window.location.search);
+  const hasProgramParam = params.has('p');
 
   const _urlLoaded = checkUrlForProgram();
   renderAll();
@@ -1697,9 +1700,9 @@ function checkUrlForProgram() {
     return null;
   }
 
-  // If URL has ?p=... parameter → land on Program page
-  // If plain URL (no params) → land on Elements page
-  if (hasSharedLink) {
+  // If URL has ?p=... parameter → land on Program page (shared program link)
+  // Otherwise (plain URL, or URL with only utm/fbclid params from Instagram) → land on Elements page
+  if (hasProgramParam) {
     const btn = findNavBtn('Program');
     showPage('program', btn);
     if (_urlLoaded) showToast('📂 Program loaded from shared link!');
