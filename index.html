@@ -224,23 +224,11 @@
   .score-divider{height:1px;background:var(--border);margin:10px 0;}
   .total-label{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;color:var(--accent);}
   .total-val{font-family:'Bebas Neue',sans-serif;font-size:34px;color:var(--gold);line-height:1;}
-
-  /* PCS */
-  .pcs-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
-  .pcs-item{background:var(--glass);border:1px solid var(--border);border-radius:11px;padding:10px;}
-  .pcs-name{font-size:10px;color:var(--silver);opacity:0.6;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;}
-  .pcs-slider{width:100%;accent-color:var(--accent);cursor:pointer;}
-  .pcs-val{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--accent);margin-top:2px;}
-  .pcs-factor{font-size:9px;color:var(--silver);opacity:0.4;margin-top:1px;}
   .ded-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
   .ded-name{font-size:12px;color: var(--silver);}
   .ded-counter{display:flex;align-items:center;gap:8px;}
   .ded-btn{width:26px;height:26px;border-radius:7px;border:1px solid var(--border);background:var(--glass);color:#fff;font-size:15px;cursor:pointer;}
   .ded-count{font-family:'Bebas Neue',sans-serif;font-size:19px;width:20px;text-align:center;color:var(--negative);}
-  .gender-row{display:flex;gap:7px;margin-bottom:10px;}
-  .gender-btn{flex:1;padding:7px;border-radius:9px;border:1px solid var(--border);
-    background:transparent;color:var(--silver);font-size:12px;font-weight:500;cursor:pointer;transition:all 0.2s;}
-  .gender-btn.active{background:rgba(0,180,216,0.14);border-color:var(--accent);color:var(--accent);}
 
   /* BOTTOM NAV */
   .bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);
@@ -466,7 +454,6 @@
   <button class="nav-btn" onclick="showPage('elements',this)"><span class="nav-icon">⛸</span>Elements</button>
   <button class="nav-btn" onclick="showPage('combo',this)"><span class="nav-icon">🔗</span>Combo</button>
   <button class="nav-btn" onclick="showPage('program',this)"><span class="nav-icon">📋</span>Program</button>
-  <button class="nav-btn" onclick="showPage('pcs',this)"><span class="nav-icon">⭐</span>PCS</button>
   <button class="nav-btn" onclick="showPage('total',this)"><span class="nav-icon">🏆</span>Total</button>
 </nav>
 
@@ -581,35 +568,21 @@
   </div>
 </div>
 
-<!-- PCS PAGE -->
-<div class="page" id="page-pcs">
-  <div class="section">
-    <div class="section-title">Program Components</div>
-    <div style="display:flex;gap:7px;margin-bottom:9px;">
-      <button class="tab active" id="spBtn" onclick="setProgramType('SP')">Short Program</button>
-      <button class="tab" id="fsBtn" onclick="setProgramType('FS')">Free Skating</button>
-    </div>
-    <div class="gender-row">
-      <button class="gender-btn active" onclick="setGender('men',this)">Men</button>
-      <button class="gender-btn" onclick="setGender('women',this)">Women</button>
-    </div>
-    <div class="pcs-grid" id="pcsGrid"></div>
-    <p style="font-size:11px;color:rgba(205,214,244,0.5);line-height:1.6;margin:10px 0 4px;padding:8px 10px;border:1px solid rgba(255,255,255,0.08);border-radius:8px;background:rgba(255,255,255,0.03);">⚠ PCS factors for other ISU categories (recreational/adult/novice/junior) may vary by federation or competition.</p>																																																																													   
-    <div class="section-title" style="margin-top:13px;">Deductions</div>
-    <div id="deductionsList"></div>
-  </div>
-</div>
-
 <!-- TOTAL PAGE -->
 <div class="page" id="page-total">
   <div class="section"><div class="section-title">Score Breakdown</div></div>
   <div class="score-panel">
-    <div class="score-row"><span class="score-label">Total Element Score (TES)</span><span class="score-val" id="totalTES">0.00</span></div>
-    <div class="score-row"><span class="score-label">Program Components (PCS)</span><span class="score-val" id="totalPCS">0.00</span></div>
-    <div class="score-row"><span class="score-label">Deductions</span><span class="score-val" style="color:var(--negative);" id="totalDED">-0.00</span></div>
+    <div class="score-row"><span class="score-label">Jumps</span><span class="score-val" id="totalJumps">0.00</span></div>
+    <div class="score-row"><span class="score-label">Spins</span><span class="score-val" id="totalSpins">0.00</span></div>
+    <div class="score-row"><span class="score-label">Steps &amp; Choreography</span><span class="score-val" id="totalSteps">0.00</span></div>
     <div class="score-divider"></div>
-    <div class="score-row"><span class="total-label">TOTAL SCORE</span><span class="total-val" id="grandTotal">0.00</span></div>
+    <div class="score-row"><span class="total-label">TOTAL ELEMENT SCORE</span><span class="total-val" id="totalTES">0.00</span></div>
   </div>
+  <p style="margin:12px 16px 0;font-size:11px;color:rgba(205,214,244,0.5);line-height:1.6;padding:10px 12px;border:1px solid rgba(255,255,255,0.08);border-radius:10px;background:rgba(255,255,255,0.03);">
+    ⚠️ This calculator shows <b style="color:rgba(205,214,244,0.8);">Technical Element Score (TES)</b> only.
+    Program Components Score (PCS) and deductions are not calculated.<br>
+    For official total scores, add PCS and subtract deductions manually.
+  </p>
 </div>
 
   <div class="bmc-footer">
@@ -773,26 +746,10 @@ const STEPS = [
   {id:'ChSp1',name:'Choreo Spin',       bv:3.50,type:'step'},
 ];
 
-const PCS_FACTORS = {
-  senior:      {SP:{men:1.67,women:1.33},FS:{men:3.33,women:2.67}},
-};
-
-const PCS_COMPONENTS = [
-  {id:'sk',name:'Skating Skills'},{id:'tr',name:'Transitions'},
-  {id:'pe',name:'Performance'},{id:'co',name:'Composition'},{id:'in',name:'Interpretation'},
-];
-
-const DEDUCTIONS = [
-  {id:'fall',name:'Fall',value:1.00},{id:'timeViol',name:'Time Violation',value:1.00},
-  {id:'costume',name:'Costume/Music',value:1.00},{id:'illegal',name:'Illegal Element',value:2.00},
-  {id:'lateStart',name:'Late Start',value:0.50},
-];
 
 // ─── STATE ───
 let state = {
-  category:'recreational', programType:'SP', gender:'men',
-  filter:'all', search:'', program:[],
-  pcs:{sk:0,tr:0,pe:0,co:0,in:0}, deductions:{}, selectedGOE:{},
+  filter:'all', search:'', program:[], selectedGOE:{},
   programName: '',  // name of currently loaded program
 };
 
@@ -850,11 +807,6 @@ function calcTES() {
     return s + (item.isCombo ? comboScore(item) : elementScore(item));
   }, 0).toFixed(2));
 }
-function calcPCS() {
-  const f = PCS_FACTORS[state.category]?.[state.programType]?.[state.gender] || 1.0;
-  return parseFloat((Object.values(state.pcs).reduce((s,v)=>s+v,0)*f).toFixed(2));
-}
-function calcDED() { return DEDUCTIONS.reduce((s,d)=>s+(state.deductions[d.id]||0)*d.value,0); }
 
 // ─── COMBO BUILDER ───
 function comboLabel() {
@@ -1243,41 +1195,24 @@ function getHardestInComboItem(item) {
   return best;
 }
 
-function renderPCS() {
-  const factor=PCS_FACTORS[state.category]?.[state.programType]?.[state.gender]||1.0;
-  let html='';
-  PCS_COMPONENTS.forEach(c=>{
-    const val=state.pcs[c.id]||0;
-    html+=`<div class="pcs-item">
-      <div class="pcs-name">${c.name}</div>
-      <input type="range" class="pcs-slider" min="0" max="10" step="0.25" value="${val}" oninput="setPCS('${c.id}',this.value)">
-      <div class="pcs-val">${parseFloat(val).toFixed(2)}</div>
-      <div class="pcs-factor">×${factor} = ${(val*factor).toFixed(2)}</div>
-    </div>`;
-  });
-  document.getElementById('pcsGrid').innerHTML=html;
-  let dhtml='';
-  DEDUCTIONS.forEach(d=>{
-    const cnt=state.deductions[d.id]||0;
-    dhtml+=`<div class="ded-row">
-      <span class="ded-name">${d.name} <span style="font-size:11px;color:var(--negative);">-${d.value.toFixed(2)}</span></span>
-      <div class="ded-counter">
-        <button class="ded-btn" onclick="changeDed('${d.id}',-1)">−</button>
-        <div class="ded-count">${cnt}</div>
-        <button class="ded-btn" onclick="changeDed('${d.id}',1)">+</button>
-      </div>
-    </div>`;
-  });
-  document.getElementById('deductionsList').innerHTML=dhtml;
-}
-
 function renderTotal() {
-  const tes=calcTES(),pcs=calcPCS(),ded=calcDED();
-  const total=Math.max(0,tes+pcs-ded);
+  let jumps=0, spins=0, steps=0;
+  state.program.forEach(item=>{
+    const score = item.isCombo ? comboScore(item) : elementScore(item);
+    if(item.isCombo){
+      jumps+=score;
+    } else {
+      const t=item.element.type;
+      if(t==='jump') jumps+=score;
+      else if(t==='spin') spins+=score;
+      else steps+=score;
+    }
+  });
+  const tes=parseFloat((jumps+spins+steps).toFixed(2));
+  document.getElementById('totalJumps').textContent=jumps.toFixed(2);
+  document.getElementById('totalSpins').textContent=spins.toFixed(2);
+  document.getElementById('totalSteps').textContent=steps.toFixed(2);
   document.getElementById('totalTES').textContent=tes.toFixed(2);
-  document.getElementById('totalPCS').textContent=pcs.toFixed(2);
-  document.getElementById('totalDED').textContent=`-${ded.toFixed(2)}`;
-  document.getElementById('grandTotal').textContent=total.toFixed(2);
 }
 
 // ─── PROGRAM NAME DISPLAY ───
@@ -1293,27 +1228,9 @@ function updateProgramNameDisplay() {
   }
 }
 
-function renderAll(){renderElements();renderProgram();renderPCS();renderTotal();}
+function renderAll(){renderElements();renderProgram();renderTotal();}
 
 // ─── ACTIONS ───
-function setCategory(cat,btn){
-  state.category=cat;
-  document.querySelectorAll('#catTabs .tab').forEach(t=>t.classList.remove('active'));
-  if(btn) btn.classList.add('active');
-  renderAll();
-}
-function setProgramType(type){
-  state.programType=type;
-  document.getElementById('spBtn').classList.toggle('active',type==='SP');
-  document.getElementById('fsBtn').classList.toggle('active',type==='FS');
-  renderPCS();renderTotal();
-}
-function setGender(g,btn){
-  state.gender=g;
-  document.querySelectorAll('.gender-btn').forEach(b=>b.classList.remove('active'));
-  if(btn) btn.classList.add('active');
-  renderPCS();renderTotal();
-}
 function showPage(page,btn){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
@@ -1321,7 +1238,6 @@ function showPage(page,btn){
   if(btn) btn.classList.add('active');
   if(page==='total') renderTotal();
   if(page==='program') renderProgram();
-  if(page==='pcs') renderPCS();
   if(page==='combo'){renderComboSlots();renderComboGOE();renderComboPreview();}
 }
 function setGOE(elId,goe){state.selectedGOE[elId]=goe;renderElements();}
@@ -1348,8 +1264,6 @@ function addSingleElement(elId){
 
 function removeElement(idx){state.program.splice(idx,1);renderProgram();renderTotal();}
 function resetProgram(){if(confirm('Clear all elements?')){state.program=[];state.programName='';updateProgramNameDisplay();renderAll();}}
-function setPCS(id,val){state.pcs[id]=parseFloat(val);renderPCS();renderTotal();}
-function changeDed(id,delta){state.deductions[id]=Math.max(0,(state.deductions[id]||0)+delta);renderPCS();renderTotal();}
 
 function showToast(msg){
   let t=document.getElementById('toast');
@@ -1567,9 +1481,6 @@ function loadToSlot(slot) {
   // Sync category tabs
   document.querySelectorAll('#catTabs .tab').forEach(t => t.classList.remove('active'));
   const tabs = document.querySelectorAll('#catTabs .tab');
-  const cats = ['recreational','adult','novice','junior','senior'];
-  const catIdx = cats.indexOf(state.category);
-  if (tabs[catIdx]) tabs[catIdx].classList.add('active');
   document.getElementById('spBtn').classList.toggle('active', state.programType === 'SP');
   document.getElementById('fsBtn').classList.toggle('active', state.programType === 'FS');
   state.programName = saved.name || '';
